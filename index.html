@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sniper Financeiro Pessoal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="login-overlay">
+        <div class="login-card">
+            <h1>SNIPER <span>PESSOAL</span></h1>
+            <input type="text" id="login-user" placeholder="Usuário">
+            <input type="password" id="login-pass" placeholder="Senha">
+            <button class="neon-btn" onclick="app.login()">Entrar no Sistema</button>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <header>
+            <h2>🎯 Resumo Financeiro</h2>
+            <div class="filter-month">
+                <label>Competência:</label>
+                <input type="month" id="month-filter" onchange="app.loadDashboard()">
+            </div>
+            <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
+        </header>
+
+        <main>
+            <section class="quick-actions">
+                <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                    <span class="action-icon">🛒</span>
+                    <span class="action-label">Lançar Gasto Diário</span>
+                </button>
+                <button class="action-btn btn-green" onclick="app.openModal('receita')">
+                    <span class="action-icon">💰</span>
+                    <span class="action-label">Lançar Receita</span>
+                </button>
+                <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
+                    <span class="action-icon">📌</span>
+                    <span class="action-label">Nova Conta Fixa</span>
+                </button>
+                <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
+                    <span class="action-icon">💸</span>
+                    <span class="action-label">Pagar Conta Fixa</span>
+                </button>
+                <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                    <span class="action-icon">ℹ️</span>
+                    <span class="action-label">Novo Informativo</span>
+                </button>
+            </section>
+
+            <section class="summary-cards" id="summary-cards">
+                <div class="card-summary card-green">
+                    <span class="card-label">Receitas</span>
+                    <span class="card-value" id="sum-receitas">R$ 0,00</span>
+                </div>
+                <div class="card-summary card-purple">
+                    <span class="card-label">Gastos Diários</span>
+                    <span class="card-value" id="sum-gastos">R$ 0,00</span>
+                </div>
+                <div class="card-summary card-orange">
+                    <span class="card-label">Contas Fixas Pagas</span>
+                    <span class="card-value" id="sum-contas">R$ 0,00</span>
+                </div>
+                <div class="card-summary card-blue">
+                    <span class="card-label">Saldo do Mês</span>
+                    <span class="card-value" id="sum-saldo">R$ 0,00</span>
+                </div>
+            </section>
+
+            <section class="dashboard-panel">
+                <h3 class="panel-title">📅 Contas Fixas do Mês</h3>
+                <div id="contas-fixas-list" class="cards-list">
+                    <p class="empty-msg">Carregando contas fixas...</p>
+                </div>
+            </section>
+
+            <section class="dashboard-panel">
+                <h3 class="panel-title">ℹ️ Informativos do Mês</h3>
+                <div id="informativos-list" class="cards-list">
+                    <p class="empty-msg">Carregando informativos...</p>
+                </div>
+            </section>
+
+            <section class="dashboard-panel">
+                <h3 class="panel-title">📊 Lançamentos do Mês</h3>
+                <div id="lancamentos-list" class="cards-list">
+                    <p class="empty-msg">Carregando lançamentos...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========== MODAL: GASTO DIÁRIO ========== -->
+    <div id="modal-gasto" class="modal-overlay hidden">
+        <div class="modal-card modal-purple">
+            <div class="modal-header">
+                <h3>🛒 Lançar Gasto Diário</h3>
+                <button class="modal-close" onclick="app.closeModal('gasto')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'gasto_diario')">
+                <label>Descrição *</label>
+                <input type="text" name="descricao" required placeholder="Ex: Almoço, Uber, Mercado...">
+                <label>Valor (R$) *</label>
+                <input type="number" name="valor" step="0.01" min="0" required placeholder="0,00">
+                <div class="row-2">
+                    <div>
+                        <label>Data Realizado *</label>
+                        <input type="date" name="data_realizado" required>
+                    </div>
+                    <div>
+                        <label>Competência (YYYY-MM) *</label>
+                        <input type="month" name="data_competencia" required>
+                    </div>
+                </div>
+                <label>Forma de Pagamento</label>
+                <select name="forma_pagamento">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Crédito</option>
+                    <option value="Boleto">Boleto</option>
+                </select>
+                <label>Observação</label>
+                <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-purple-solid">Salvar Gasto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: RECEITA ========== -->
+    <div id="modal-receita" class="modal-overlay hidden">
+        <div class="modal-card modal-green">
+            <div class="modal-header">
+                <h3>💰 Lançar Receita</h3>
+                <button class="modal-close" onclick="app.closeModal('receita')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'receita')">
+                <label>Descrição *</label>
+                <input type="text" name="descricao" required placeholder="Ex: Salário, Freelance...">
+                <label>Valor (R$) *</label>
+                <input type="number" name="valor" step="0.01" min="0" required placeholder="0,00">
+                <div class="row-2">
+                    <div>
+                        <label>Data Realizado *</label>
+                        <input type="date" name="data_realizado" required>
+                    </div>
+                    <div>
+                        <label>Competência (YYYY-MM) *</label>
+                        <input type="month" name="data_competencia" required>
+                    </div>
+                </div>
+                <label>Forma de Recebimento</label>
+                <select name="forma_pagamento">
+                    <option value="Pix">Pix</option>
+                    <option value="Transferência">Transferência</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Boleto">Boleto</option>
+                </select>
+                <label>Observação</label>
+                <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-green-solid">Salvar Receita</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: NOVA CONTA FIXA ========== -->
+    <div id="modal-conta_fixa" class="modal-overlay hidden">
+        <div class="modal-card modal-orange">
+            <div class="modal-header">
+                <h3>📌 Nova Conta Fixa</h3>
+                <button class="modal-close" onclick="app.closeModal('conta_fixa')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'nova_conta_fixa')">
+                <label>Descrição *</label>
+                <input type="text" name="descricao" required placeholder="Ex: Aluguel, Internet, Netflix...">
+                <label>Valor Estimado (R$) *</label>
+                <input type="number" name="valor_estimado" step="0.01" min="0" required placeholder="0,00">
+                <label>Tipo *</label>
+                <select name="tipo" id="conta-tipo" required onchange="app.toggleParcelas()">
+                    <option value="infinita">Infinita (recorrente)</option>
+                    <option value="parcelada">Parcelada</option>
+                </select>
+                <div id="parcelas-field" class="hidden">
+                    <label>Total de Parcelas *</label>
+                    <input type="number" name="total_parcelas" min="1" placeholder="Ex: 12">
+                </div>
+                <label>Dia de Vencimento *</label>
+                <input type="number" name="dia_vencimento" min="1" max="31" required placeholder="Ex: 10">
+                <label>Observação</label>
+                <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-orange-solid">Salvar Conta Fixa</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: PAGAR CONTA FIXA ========== -->
+    <div id="modal-pagar_conta_fixa" class="modal-overlay hidden">
+        <div class="modal-card modal-yellow">
+            <div class="modal-header">
+                <h3>💸 Pagar Conta Fixa</h3>
+                <button class="modal-close" onclick="app.closeModal('pagar_conta_fixa')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'conta_fixa')">
+                <label>Conta Fixa *</label>
+                <select name="conta_fixa_id" id="pagar-conta-fixa-id" required>
+                    <option value="">Carregando contas fixas...</option>
+                </select>
+                <div id="pagar-info" class="hidden" style="background:#1d1d20;border:1px solid #2a2a2e;border-radius:8px;padding:10px;margin-bottom:8px;font-size:0.85rem;color:var(--text-gray);"></div>
+                <label>Valor Pago (R$) *</label>
+                <input type="number" name="valor" id="pagar-valor" step="0.01" min="0" required placeholder="0,00">
+                <div class="row-2">
+                    <div>
+                        <label>Data do Pagamento *</label>
+                        <input type="date" name="data_realizado" required>
+                    </div>
+                    <div>
+                        <label>Competência (YYYY-MM) *</label>
+                        <input type="month" name="data_competencia" required>
+                    </div>
+                </div>
+                <label>Forma de Pagamento</label>
+                <select name="forma_pagamento">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Crédito</option>
+                    <option value="Boleto">Boleto</option>
+                </select>
+                <label>Observação</label>
+                <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-yellow-solid">Confirmar Pagamento</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: INFORMATIVO ========== -->
+    <div id="modal-informativo" class="modal-overlay hidden">
+        <div class="modal-card modal-blue">
+            <div class="modal-header">
+                <h3>ℹ️ Novo Informativo</h3>
+                <button class="modal-close" onclick="app.closeModal('informativo')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'informativo')">
+                <label>Serviço *</label>
+                <input type="text" name="servico" required placeholder="Ex: Spotify, Energia...">
+                <label>Dia de Cobrança *</label>
+                <input type="number" name="dia_cobranca" min="1" max="31" required placeholder="Ex: 15">
+                <label>Cartão Destino</label>
+                <input type="text" name="cartao_destino" placeholder="Ex: Nubank, Inter...">
+                <label>Modalidade</label>
+                <select name="modalidade">
+                    <option value="Mensal">Mensal</option>
+                    <option value="Anual">Anual</option>
+                    <option value="Semestral">Semestral</option>
+                    <option value="Trimestral">Trimestral</option>
+                    <option value="Única">Única</option>
+                </select>
+                <label>Observação</label>
+                <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-blue-solid">Salvar Informativo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast de feedback -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
