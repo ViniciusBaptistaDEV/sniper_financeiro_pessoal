@@ -100,7 +100,7 @@
                 <h3>🛒 Lançar Gasto Diário</h3>
                 <button class="modal-close" onclick="app.closeModal('gasto')">×</button>
             </div>
-            <form onsubmit="app.submitForm(event, 'gasto_diario')">
+            <form onsubmit="app.submitForm(event, 'gasto-diario')">
                 <label>Descrição *</label>
                 <input type="text" name="descricao" required placeholder="Ex: Almoço, Uber, Mercado...">
                 <label>Valor (R$) *</label>
@@ -173,7 +173,7 @@
                 <h3>📌 Nova Conta Fixa</h3>
                 <button class="modal-close" onclick="app.closeModal('conta_fixa')">×</button>
             </div>
-            <form onsubmit="app.submitForm(event, 'nova_conta_fixa')">
+            <form onsubmit="app.submitForm(event, 'nova-conta-fixa')">
                 <label>Descrição *</label>
                 <input type="text" name="descricao" required placeholder="Ex: Aluguel, Internet, Netflix...">
                 <label>Valor Estimado (R$) *</label>
@@ -203,7 +203,7 @@
                 <h3>💸 Pagar Conta Fixa</h3>
                 <button class="modal-close" onclick="app.closeModal('pagar_conta_fixa')">×</button>
             </div>
-            <form onsubmit="app.submitForm(event, 'conta_fixa')">
+            <form onsubmit="app.submitForm(event, 'conta-fixa')">
                 <label>Conta Fixa *</label>
                 <select name="conta_fixa_id" id="pagar-conta-fixa-id" required>
                     <option value="">Carregando contas fixas...</option>

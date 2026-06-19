@@ -1,6 +1,5 @@
 // api/sheets-helper.js
-// Responsável por centralizar a autenticação e o acesso à planilha do Google Sheets.
-// Reusa uma única instância de doc/cache entre invocações (cold start friendly).
+// Helpers centralizados: autenticação Google Sheets + leitura/gravação de abas.
 
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
@@ -90,4 +89,55 @@ async function addSheetRow(sheetTitle, dataObj) {
     return { id: nextId, row: created.toObject() };
 }
 
-module.exports = { getDoc, getSheetRows, addSheetRow };
+/**
+ * Helpers de parsing usados em vários handlers.
+ */
+function toNumber(v) {
+    if (v === undefined || v === null || v === '') return 0;
+    if (typeof v === 'number') return v;
+    const s = String(v).replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function toInt(v) {
+    if (v === undefined || v === null || v === '') return 0;
+    const n = parseInt(String(v), 10);
+    return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * Aplica cabeçalhos CORS padrão em todas as respostas.
+ */
+function setCors(res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+}
+
+/**
+ * Shortcut: só responde OPTIONS e valida método, senão devolve null.
+ * Retorna `true` se a request foi tratada (não prosseguir).
+ */
+function handlePreflightOrMethod(req, res, method) {
+    setCors(res);
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return true;
+    }
+    if (req.method !== method) {
+        res.status(405).json({ ok: false, error: `Método não permitido. Use ${method}.` });
+        return true;
+    }
+    return false;
+}
+
+module.exports = {
+    getDoc,
+    getSheetRows,
+    addSheetRow,
+    toNumber,
+    toInt,
+    setCors,
+    handlePreflightOrMethod,
+};
