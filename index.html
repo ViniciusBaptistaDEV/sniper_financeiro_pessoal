@@ -20,38 +20,44 @@
     </div>
 
     <div id="main-app" class="hidden">
-        <header>
-            <h2>SNIPER FINANCEIRO<br><span>PESSOAL</span></h2>
-            <div class="filter-month">
-                <label>Competência:</label>
-                <input type="month" id="month-filter" onchange="app.loadDashboard()">
+        <aside class="quick-actions">
+            <div class="sidebar-brand">
+                <span class="sidebar-brand-main">SNIPER FINANCEIRO</span>
+                <span class="sidebar-brand-sub">PESSOAL</span>
             </div>
-            <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
-        </header>
+            <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                <span class="action-icon">🛒</span>
+                <span class="action-label">Gasto Diário</span>
+            </button>
+            <button class="action-btn btn-green" onclick="app.openModal('receita')">
+                <span class="action-icon">💰</span>
+                <span class="action-label">Receita</span>
+            </button>
+            <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
+                <span class="action-icon">📌</span>
+                <span class="action-label">Conta Fixa</span>
+            </button>
+            <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
+                <span class="action-icon">💸</span>
+                <span class="action-label">Pagar Conta</span>
+            </button>
+            <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                <span class="action-icon">ℹ️</span>
+                <span class="action-label">Informativo</span>
+            </button>
+        </aside>
 
-        <main>
-            <section class="quick-actions">
-                <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
-                    <span class="action-icon">🛒</span>
-                    <span class="action-label">Lançar Gasto Diário</span>
-                </button>
-                <button class="action-btn btn-green" onclick="app.openModal('receita')">
-                    <span class="action-icon">💰</span>
-                    <span class="action-label">Lançar Receita</span>
-                </button>
-                <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
-                    <span class="action-icon">📌</span>
-                    <span class="action-label">Nova Conta Fixa</span>
-                </button>
-                <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
-                    <span class="action-icon">💸</span>
-                    <span class="action-label">Pagar Conta Fixa</span>
-                </button>
-                <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
-                    <span class="action-icon">ℹ️</span>
-                    <span class="action-label">Novo Informativo</span>
-                </button>
-            </section>
+        <div class="app-container">
+            <header>
+                <h2 class="mobile-title">SNIPER FINANCEIRO<br><span>PESSOAL</span></h2>
+                <div class="filter-month">
+                    <label>Competência:</label>
+                    <input type="month" id="month-filter" onchange="app.loadDashboard()">
+                </div>
+                <button class="neon-btn btn-logout btn-logout-desktop" onclick="app.logout()">Sair</button>
+            </header>
+
+            <main>
 
             <section class="summary-cards" id="summary-cards">
                 <div class="card-summary card-green">
@@ -92,7 +98,12 @@
                     <p class="empty-msg">Carregando lançamentos...</p>
                 </div>
             </section>
-        </main>
+
+            <div class="btn-logout-mobile-wrapper">
+                <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
+            </div>
+            </main>
+        </div>
     </div>
 
     <!-- ========== MODAL: GASTO DIÁRIO ========== -->
@@ -278,10 +289,7 @@
             </div>
             <div class="modal-body-neon">
                 <div class="scanner-line"></div>
-                <p>O usuário ou a senha inseridos estão incorretos no banco de dados do Sniper.</p>
-                <p
-                    style="font-size: 0.8rem; color: var(--text-gray); margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">
-                    Erro de Autenticação 401</p>
+                <p>O usuário ou a senha inseridos estão incorretos.</p>
             </div>
             <button class="neon-btn btn-red-solid" onclick="app.closeModal('acesso-negado')">Tentar Novamente</button>
         </div>
