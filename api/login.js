@@ -26,8 +26,8 @@ module.exports = async function handler(req, res) {
     try {
         const { user, pass } = req.body || {};
 
-        const validUser = process.env.APP_LOGIN;
-        const validPass = process.env.APP_PASSWORD;
+        const validUser = (process.env.APP_LOGIN || '').replace(/['"]/g, '');
+        const validPass = (process.env.APP_PASSWORD || '').replace(/['"]/g, '');
 
         if (!validUser || !validPass) {
             return res.status(500).json({

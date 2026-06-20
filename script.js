@@ -21,19 +21,32 @@ const app = {
     async login() {
         const user = document.getElementById('login-user').value;
         const pass = document.getElementById('login-pass').value;
+        const loginBtn = document.getElementById('login-btn');
 
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user, pass })
-        });
+        const originalBtnHTML = loginBtn.innerHTML;
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Verificando...';
 
-        if (res.ok) {
-            const { token } = await res.json();
-            sessionStorage.setItem('sniper_pessoal_token', token);
-            window.location.reload();
-        } else {
-            this.toast('Credenciais inválidas!', 'error');
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass })
+            });
+
+            if (res.ok) {
+                const { token } = await res.json();
+                sessionStorage.setItem('sniper_pessoal_token', token);
+                window.location.reload();
+            } else {
+                this.openModal('acesso-negado');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalBtnHTML;
+            }
+        } catch (err) {
+            this.toast('Erro na conexão com o servidor', 'error');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnHTML;
         }
     },
 

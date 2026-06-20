@@ -1,1 +1,0 @@
-Sempre apresente as mudanças propostas como um bloco de código de sugestão (diff). Nunca aplique alterações diretamente no arquivo sem que eu aprove a sugestão primeiro.

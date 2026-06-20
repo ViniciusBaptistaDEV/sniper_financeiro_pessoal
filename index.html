@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,20 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div id="login-overlay">
-        <div class="login-card">
-            <h1>SNIPER <span>PESSOAL</span></h1>
-            <input type="text" id="login-user" placeholder="Usuário">
-            <input type="password" id="login-pass" placeholder="Senha">
-            <button class="neon-btn" onclick="app.login()">Entrar no Sistema</button>
-        </div>
+        <form class="login-card" onsubmit="event.preventDefault(); app.login();">
+            <h1>SNIPER FINANCEIRO<br><span>PESSOAL</span></h1>
+            <input type="text" id="login-user" placeholder="Usuário" autocomplete="username">
+            <input type="password" id="login-pass" placeholder="Senha" autocomplete="current-password">
+            <button type="submit" id="login-btn" class="neon-btn">Entrar no Sistema</button>
+        </form>
     </div>
 
     <div id="main-app" class="hidden">
         <header>
-            <h2>🎯 Resumo Financeiro</h2>
+            <h2>SNIPER FINANCEIRO<br><span>PESSOAL</span></h2>
             <div class="filter-month">
                 <label>Competência:</label>
                 <input type="month" id="month-filter" onchange="app.loadDashboard()">
@@ -208,7 +210,9 @@
                 <select name="conta_fixa_id" id="pagar-conta-fixa-id" required>
                     <option value="">Carregando contas fixas...</option>
                 </select>
-                <div id="pagar-info" class="hidden" style="background:#1d1d20;border:1px solid #2a2a2e;border-radius:8px;padding:10px;margin-bottom:8px;font-size:0.85rem;color:var(--text-gray);"></div>
+                <div id="pagar-info" class="hidden"
+                    style="background:#1d1d20;border:1px solid #2a2a2e;border-radius:8px;padding:10px;margin-bottom:8px;font-size:0.85rem;color:var(--text-gray);">
+                </div>
                 <label>Valor Pago (R$) *</label>
                 <input type="number" name="valor" id="pagar-valor" step="0.01" min="0" required placeholder="0,00">
                 <div class="row-2">
@@ -265,9 +269,28 @@
         </div>
     </div>
 
+    <!-- ========== MODAL: ACESSO NEGADO ========== -->
+    <div id="modal-acesso-negado" class="modal-overlay hidden">
+        <div class="modal-card modal-red-neon">
+            <div class="modal-header-neon">
+                <span class="warning-icon">🚫</span>
+                <h3>ACESSO NEGADO</h3>
+            </div>
+            <div class="modal-body-neon">
+                <div class="scanner-line"></div>
+                <p>O usuário ou a senha inseridos estão incorretos no banco de dados do Sniper.</p>
+                <p
+                    style="font-size: 0.8rem; color: var(--text-gray); margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                    Erro de Autenticação 401</p>
+            </div>
+            <button class="neon-btn btn-red-solid" onclick="app.closeModal('acesso-negado')">Tentar Novamente</button>
+        </div>
+    </div>
+
     <!-- Toast de feedback -->
     <div id="toast" class="toast hidden"></div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
