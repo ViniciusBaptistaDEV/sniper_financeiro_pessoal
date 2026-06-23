@@ -7,6 +7,8 @@
     <title>Sniper Financeiro Pessoal</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231a4fdb'/><stop offset='1' stop-color='%230a1a4a'/></linearGradient><filter id='glow' x='-50' y='-50' width='200' height='200'><feGaussianBlur stdDeviation='3' result='coloredBlur'/><feMerge><feMergeNode in='coloredBlur'/><feMergeNode in='SourceGraphic'/></feMerge></filter></defs><rect width='100' height='100' rx='20' fill='url(%23bg)'/><path d='M25 70 L45 40 L65 50 L80 25' fill='none' stroke='%2300ffff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' filter='url(%23glow)' opacity='0.7'/><path d='M25 70 L45 40 L65 50 L80 25' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/><circle cx='80' cy='25' r='6' fill='%2300ffff' filter='url(%23glow)'/><circle cx='80' cy='25' r='3' fill='%23ffffff'/></svg>">
 </head>
 
 <body>
@@ -59,49 +61,49 @@
 
             <main>
 
-            <section class="summary-cards" id="summary-cards">
-                <div class="card-summary card-green">
-                    <span class="card-label">Receitas</span>
-                    <span class="card-value" id="sum-receitas">R$ 0,00</span>
-                </div>
-                <div class="card-summary card-purple">
-                    <span class="card-label">Gastos Diários</span>
-                    <span class="card-value" id="sum-gastos">R$ 0,00</span>
-                </div>
-                <div class="card-summary card-orange">
-                    <span class="card-label">Contas Fixas Pagas</span>
-                    <span class="card-value" id="sum-contas">R$ 0,00</span>
-                </div>
-                <div class="card-summary card-blue">
-                    <span class="card-label">Saldo do Mês</span>
-                    <span class="card-value" id="sum-saldo">R$ 0,00</span>
-                </div>
-            </section>
+                <section class="summary-cards" id="summary-cards">
+                    <div class="card-summary card-green">
+                        <span class="card-label">Receitas</span>
+                        <span class="card-value" id="sum-receitas">R$ 0,00</span>
+                    </div>
+                    <div class="card-summary card-purple">
+                        <span class="card-label">Gastos Diários</span>
+                        <span class="card-value" id="sum-gastos">R$ 0,00</span>
+                    </div>
+                    <div class="card-summary card-orange">
+                        <span class="card-label">Contas Fixas Pagas</span>
+                        <span class="card-value" id="sum-contas">R$ 0,00</span>
+                    </div>
+                    <div class="card-summary card-blue">
+                        <span class="card-label">Saldo do Mês</span>
+                        <span class="card-value" id="sum-saldo">R$ 0,00</span>
+                    </div>
+                </section>
 
-            <section class="dashboard-panel">
-                <h3 class="panel-title">📅 Contas Fixas do Mês</h3>
-                <div id="contas-fixas-list" class="cards-list">
-                    <p class="empty-msg">Carregando contas fixas...</p>
-                </div>
-            </section>
+                <section class="dashboard-panel">
+                    <h3 class="panel-title">📅 Contas Fixas do Mês</h3>
+                    <div id="contas-fixas-list" class="cards-list">
+                        <p class="empty-msg">Carregando contas fixas...</p>
+                    </div>
+                </section>
 
-            <section class="dashboard-panel">
-                <h3 class="panel-title">ℹ️ Informativos do Mês</h3>
-                <div id="informativos-list" class="cards-list">
-                    <p class="empty-msg">Carregando informativos...</p>
-                </div>
-            </section>
+                <section class="dashboard-panel">
+                    <h3 class="panel-title">ℹ️ Informativos do Mês</h3>
+                    <div id="informativos-list" class="cards-list">
+                        <p class="empty-msg">Carregando informativos...</p>
+                    </div>
+                </section>
 
-            <section class="dashboard-panel">
-                <h3 class="panel-title">📊 Lançamentos do Mês</h3>
-                <div id="lancamentos-list" class="cards-list">
-                    <p class="empty-msg">Carregando lançamentos...</p>
-                </div>
-            </section>
+                <section class="dashboard-panel">
+                    <h3 class="panel-title">📊 Lançamentos do Mês</h3>
+                    <div id="lancamentos-list" class="cards-list">
+                        <p class="empty-msg">Carregando lançamentos...</p>
+                    </div>
+                </section>
 
-            <div class="btn-logout-mobile-wrapper">
-                <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
-            </div>
+                <div class="btn-logout-mobile-wrapper">
+                    <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
+                </div>
             </main>
         </div>
     </div>
@@ -292,6 +294,66 @@
                 <p>O usuário ou a senha inseridos estão incorretos.</p>
             </div>
             <button class="neon-btn btn-red-solid" onclick="app.closeModal('acesso-negado')">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: CONFIRMAR EXCLUSÃO ========== -->
+    <div id="modal-confirmar-exclusao" class="modal-overlay hidden">
+        <div class="modal-card modal-delete-confirm">
+            <div class="modal-header-neon modal-delete-header">
+                <span class="delete-icon">⚠️</span>
+                <h3>EXCLUIR LANÇAMENTO</h3>
+            </div>
+            <div class="modal-delete-body">
+                <div class="delete-scanner-line"></div>
+                <p id="delete-confirm-msg">Tem certeza que deseja excluir este lançamento?<br>Esta ação <strong>não pode ser desfeita</strong>.</p>
+                <div class="delete-item-preview" id="delete-item-preview"></div>
+            </div>
+            <div class="modal-delete-actions">
+                <button class="neon-btn btn-ghost-gray" onclick="app.closeModal('confirmar-exclusao')">Cancelar</button>
+                <button class="neon-btn btn-red-solid btn-delete-confirm" id="btn-confirmar-exclusao" onclick="app.confirmarExclusao()">
+                    <span class="delete-btn-icon">🗑</span> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: EDITAR LANÇAMENTO ========== -->
+    <div id="modal-editar-lancamento" class="modal-overlay hidden">
+        <div class="modal-card modal-edit-neon">
+            <div class="modal-header">
+                <h3>✏️ Editar Lançamento</h3>
+                <button class="modal-close" onclick="app.closeModal('editar-lancamento')">×</button>
+            </div>
+            <form onsubmit="app.submitEditarLancamento(event)">
+                <input type="hidden" id="edit-lancamento-id">
+                <label>Descrição *</label>
+                <input type="text" id="edit-descricao" required placeholder="Descrição do lançamento">
+                <label>Valor (R$) *</label>
+                <input type="number" id="edit-valor" step="0.01" min="0" required placeholder="0,00">
+                <div class="row-2">
+                    <div>
+                        <label>Data Realizado *</label>
+                        <input type="date" id="edit-data-realizado" required>
+                    </div>
+                    <div>
+                        <label>Competência *</label>
+                        <input type="month" id="edit-data-competencia" required>
+                    </div>
+                </div>
+                <label>Forma de Pagamento</label>
+                <select id="edit-forma-pagamento">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Crédito</option>
+                    <option value="Boleto">Boleto</option>
+                    <option value="Transferência">Transferência</option>
+                </select>
+                <label>Observação</label>
+                <textarea id="edit-observacao" rows="2" placeholder="Opcional"></textarea>
+                <button type="submit" class="neon-btn btn-save btn-edit-solid">Salvar Alterações</button>
+            </form>
         </div>
     </div>
 

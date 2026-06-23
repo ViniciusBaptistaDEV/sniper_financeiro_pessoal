@@ -1006,3 +1006,178 @@ main {
     color: #000 !important;
     box-shadow: 0 0 20px #ff0055 !important;
 }
+
+/* ============ BOTÕES DE AÇÃO NOS ITEM-CARDS ============ */
+.item-card {
+    position: relative;
+}
+
+.item-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    justify-content: flex-end;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.item-card:hover .item-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.item-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    line-height: 1;
+    color: var(--text-gray);
+}
+
+.item-action-btn:active {
+    transform: scale(0.88);
+    transition: transform 0.1s;
+}
+
+.item-action-btn.btn-edit:hover {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.item-action-btn.btn-delete:hover {
+    border-color: #ff0055;
+    color: #ff0055;
+    background: rgba(255, 0, 85, 0.1);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+}
+
+/* ============ MODAL: CONFIRMAR EXCLUSÃO ============ */
+.modal-card.modal-delete-confirm {
+    border: 2px solid #ff0055;
+    box-shadow: 0 0 40px rgba(255, 0, 85, 0.35), inset 0 0 20px rgba(255, 0, 85, 0.05);
+    background: rgba(18, 14, 18, 0.97);
+    backdrop-filter: blur(12px);
+    text-align: center;
+    max-width: 400px;
+}
+
+.modal-delete-header {
+    gap: 8px;
+    margin-bottom: 1.2rem;
+}
+
+.modal-delete-header h3 {
+    color: #ff0055;
+    text-shadow: 0 0 12px rgba(255, 0, 85, 0.6);
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+}
+
+.delete-icon {
+    font-size: 2.4rem;
+    animation: pulseGlow 1.5s infinite alternate;
+}
+
+.modal-delete-body {
+    position: relative;
+    padding: 1.2rem 0;
+    margin-bottom: 1.2rem;
+    border-top: 1px dashed rgba(255, 0, 85, 0.25);
+    border-bottom: 1px dashed rgba(255, 0, 85, 0.25);
+    overflow: hidden;
+}
+
+.modal-delete-body p {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+}
+
+.modal-delete-body strong {
+    color: #ff0055;
+}
+
+.delete-item-preview {
+    background: rgba(255, 0, 85, 0.06);
+    border: 1px solid rgba(255, 0, 85, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: var(--text-gray);
+    text-align: left;
+    margin-top: 4px;
+    min-height: 32px;
+}
+
+.delete-item-preview:empty {
+    display: none;
+}
+
+.delete-scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff0055, transparent);
+    animation: scan 2s linear infinite;
+    opacity: 0.6;
+}
+
+.modal-delete-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-ghost-gray {
+    color: var(--text-gray) !important;
+    border-color: #444 !important;
+    background: transparent;
+}
+
+.btn-ghost-gray:hover {
+    background: #2a2a2e !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.btn-delete-confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.delete-btn-icon {
+    font-size: 1rem;
+}
+
+/* ============ MODAL: EDITAR LANÇAMENTO ============ */
+.modal-card.modal-edit-neon {
+    border-top: 3px solid var(--neon-blue);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), 0 0 60px rgba(0, 212, 255, 0.05);
+}
+
+.btn-edit-solid {
+    color: var(--neon-blue) !important;
+    border-color: var(--neon-blue) !important;
+}
+
+.btn-edit-solid:hover {
+    background: var(--neon-blue) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--neon-blue) !important;
+}

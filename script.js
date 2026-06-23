@@ -197,11 +197,15 @@ const app = {
         this.state.currentMonth = month;
 
         try {
-            const [contasFixas, informativos, lancamentos] = await Promise.all([
+            const [resContas, resInformativos, resLancamentos] = await Promise.all([
                 this.api('/api/contas-fixas'),
                 this.api('/api/informativos'),
                 this.api('/api/lancamentos?mes=' + month)
             ]);
+
+            const contasFixas = Array.isArray(resContas?.contasFixas) ? resContas.contasFixas : [];
+            const informativos = Array.isArray(resInformativos?.informativos) ? resInformativos.informativos : [];
+            const lancamentos  = Array.isArray(resLancamentos?.lancamentos)  ? resLancamentos.lancamentos  : [];
 
             this.state.contasFixas = contasFixas;
             this.state.lancamentosCache = lancamentos;
@@ -223,7 +227,7 @@ const app = {
             document.getElementById('sum-saldo').textContent    = this.brl(totalReceitas - totalGastos - totalContasPagas);
 
             this.renderContasFixas(contasFixas, lancamentos.filter(l => l.tipo === 'conta_fixa'), contaById);
-            this.renderInformativos(informativos);
+            this.renderInformativos(Array.isArray(informativos) ? informativos : []);
             this.renderLancamentos(lancamentos, contaById);
         } catch (err) {
             this.toast('Erro ao carregar dashboard: ' + err.message, 'error');
@@ -290,7 +294,6 @@ const app = {
             let descricao = l.descricao;
             let badge = '';
             if (l.tipo === 'conta_fixa' && l.conta_fixa_id) {
-                // ⬇️ Cruzamento por ID — descrição vem da aba Contas_Fixas
                 const conta = contaById[String(l.conta_fixa_id)];
                 descricao = conta ? conta.descricao : `(Conta #${l.conta_fixa_id} removida)`;
                 badge = '<span class="badge badge-orange">Conta Fixa</span>';
@@ -312,8 +315,125 @@ const app = {
                     <div class="item-value ${l.tipo === 'receita' ? 'txt-green' : l.tipo === 'conta_fixa' ? 'txt-orange' : 'txt-purple'}">
                         ${l.tipo === 'receita' ? '+' : '-'} ${this.brl(l.valor)}
                     </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; border-top: 1px solid #2a2a2e; padding-top: 10px;">
+                        <button style="background: transparent; border: 1px solid #00ffff; color: #00ffff; border-radius: 4px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 0 8px rgba(0,255,255,0.2); transition: all 0.2s ease;" onclick="app.abrirModalEdicao('${l.id}')">✏️ Editar</button>
+                        <button style="background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; border-radius: 4px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 0 8px rgba(255,77,77,0.2); transition: all 0.2s ease;" onclick="app.abrirModalExclusao('${l.id}')">🗑 Excluir</button>
+                    </div>
                 </div>`;
         }).join('');
+    },
+
+    /* ========== FUNÇÕES DE EDITAR E EXCLUIR ========== */
+    abrirModalExclusao(id) {
+        const item = this.state.lancamentosCache.find(l => String(l.id) === String(id));
+        if (!item) return;
+
+        this.state.lancamentoIdExclusao = id;
+
+        let desc = item.descricao;
+        if (item.tipo === 'conta_fixa' && item.conta_fixa_id) {
+            const conta = this.state.contasFixas.find(c => String(c.id) === String(item.conta_fixa_id));
+            if (conta) desc = conta.descricao;
+        }
+
+        const previewEl = document.getElementById('delete-item-preview');
+        if (previewEl) {
+            previewEl.innerHTML = `
+                <div style="background:#1d1d20; padding:12px; border-radius:8px; border:1px solid #ff4d4d33; margin-top:10px; color: #fff;">
+                    <strong>${desc}</strong><br>
+                    <span style="color: #ff4d4d;">Valor: ${this.brl(item.valor)}</span><br>
+                    <span style="font-size: 0.85rem; color: #aaa;">Data: ${item.data_realizado}</span>
+                </div>`;
+        }
+
+        this.openModal('confirmar-exclusao');
+    },
+
+    async confirmarExclusao() {
+        const id = this.state.lancamentoIdExclusao;
+        if (!id) return;
+
+        const btn = document.getElementById('btn-confirmar-exclusao');
+        const txtOriginal = btn.innerHTML;
+        btn.innerHTML = 'Excluindo...';
+        btn.disabled = true;
+
+        try {
+            await this.api('/api/lancamento-delete', {
+                method: 'DELETE',
+                body: JSON.stringify({ id })
+            });
+
+            this.toast('Lançamento excluído com sucesso!', 'success');
+            this.closeModal('confirmar-exclusao');
+            this.loadDashboard();
+        } catch (err) {
+            this.toast('Erro ao excluir: ' + err.message, 'error');
+        } finally {
+            btn.innerHTML = txtOriginal;
+            btn.disabled = false;
+        }
+    },
+
+    abrirModalEdicao(id) {
+        const item = this.state.lancamentosCache.find(l => String(l.id) === String(id));
+        if (!item) return;
+
+        document.getElementById('edit-lancamento-id').value = item.id;
+
+        let desc = item.descricao;
+        if (item.tipo === 'conta_fixa' && item.conta_fixa_id) {
+            const conta = this.state.contasFixas.find(c => String(c.id) === String(item.conta_fixa_id));
+            if (conta) desc = conta.descricao;
+            document.getElementById('edit-descricao').readOnly = true; 
+        } else {
+            document.getElementById('edit-descricao').readOnly = false;
+        }
+
+        document.getElementById('edit-descricao').value = desc || '';
+        document.getElementById('edit-valor').value = Number(item.valor).toFixed(2);
+        document.getElementById('edit-data-realizado').value = item.data_realizado || '';
+        document.getElementById('edit-data-competencia').value = item.data_competencia || '';
+        document.getElementById('edit-forma-pagamento').value = item.forma_pagamento || '';
+        document.getElementById('edit-observacao').value = item.observacao || '';
+
+        this.openModal('editar-lancamento');
+    },
+
+    async submitEditarLancamento(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-lancamento-id').value;
+        const itemOriginal = this.state.lancamentosCache.find(l => String(l.id) === String(id));
+
+        const payload = {
+            id: id,
+            descricao: document.getElementById('edit-descricao').value,
+            valor: Number(document.getElementById('edit-valor').value),
+            data_realizado: document.getElementById('edit-data-realizado').value,
+            data_competencia: document.getElementById('edit-data-competencia').value,
+            forma_pagamento: document.getElementById('edit-forma-pagamento').value,
+            observacao: document.getElementById('edit-observacao').value
+        };
+
+        if (itemOriginal) {
+            payload.tipo = itemOriginal.tipo;
+            if (itemOriginal.conta_fixa_id) {
+                payload.conta_fixa_id = itemOriginal.conta_fixa_id;
+            }
+        }
+
+        try {
+            await this.api('/api/lancamento-update', {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+
+            this.toast('Lançamento atualizado com sucesso!', 'success');
+            this.closeModal('editar-lancamento');
+            this.loadDashboard();
+        } catch (err) {
+            this.toast('Erro ao editar: ' + err.message, 'error');
+        }
     }
 };
 
