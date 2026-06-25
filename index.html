@@ -47,6 +47,18 @@
                 <span class="action-icon">ℹ️</span>
                 <span class="action-label">Informativo</span>
             </button>
+            <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
+                <span class="action-icon">📈</span>
+                <span class="action-label">Sniper Investimentos</span>
+            </button>
+            <button class="action-btn btn-grey" onclick="app.openModal('configuracoes')">
+                <span class="action-icon">⚙️</span>
+                <span class="action-label">Configurações</span>
+            </button>
+
+            <div class="quick-actions-footer" style="margin-top: auto;">
+                <button class="neon-btn btn-logout btn-logout-desktop" onclick="app.logout()">Encerrar Sessão</button>
+            </div>
         </aside>
 
         <div class="app-container">
@@ -56,7 +68,6 @@
                     <label>Competência:</label>
                     <input type="month" id="month-filter" onchange="app.loadDashboard()">
                 </div>
-                <button class="neon-btn btn-logout btn-logout-desktop" onclick="app.logout()">Sair</button>
             </header>
 
             <main>
@@ -102,7 +113,7 @@
                 </section>
 
                 <div class="btn-logout-mobile-wrapper">
-                    <button class="neon-btn btn-logout" onclick="app.logout()">Sair</button>
+                    <button class="neon-btn btn-logout" onclick="app.logout()">Encerrar Sessão</button>
                 </div>
             </main>
         </div>
@@ -131,7 +142,7 @@
                     </div>
                 </div>
                 <label>Forma de Pagamento</label>
-                <select name="forma_pagamento">
+                <select name="forma_pagamento" id="gasto-forma-pagamento">
                     <option value="Dinheiro">Dinheiro</option>
                     <option value="Pix">Pix</option>
                     <option value="Débito">Débito</option>
@@ -306,12 +317,14 @@
             </div>
             <div class="modal-delete-body">
                 <div class="delete-scanner-line"></div>
-                <p id="delete-confirm-msg">Tem certeza que deseja excluir este lançamento?<br>Esta ação <strong>não pode ser desfeita</strong>.</p>
+                <p id="delete-confirm-msg">Tem certeza que deseja excluir este lançamento?<br>Esta ação <strong>não pode
+                        ser desfeita</strong>.</p>
                 <div class="delete-item-preview" id="delete-item-preview"></div>
             </div>
             <div class="modal-delete-actions">
                 <button class="neon-btn btn-ghost-gray" onclick="app.closeModal('confirmar-exclusao')">Cancelar</button>
-                <button class="neon-btn btn-red-solid btn-delete-confirm" id="btn-confirmar-exclusao" onclick="app.confirmarExclusao()">
+                <button class="neon-btn btn-red-solid btn-delete-confirm" id="btn-confirmar-exclusao"
+                    onclick="app.confirmarExclusao()">
                     <span class="delete-btn-icon">🗑</span> Excluir
                 </button>
             </div>
@@ -353,6 +366,34 @@
                 <label>Observação</label>
                 <textarea id="edit-observacao" rows="2" placeholder="Opcional"></textarea>
                 <button type="submit" class="neon-btn btn-save btn-edit-solid">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: CONFIGURAÇÕES ========== -->
+    <div id="modal-configuracoes" class="modal-overlay hidden">
+        <div class="modal-card modal-blue">
+            <div class="modal-header">
+                <h3>⚙️ Configurações</h3>
+                <button class="modal-close" onclick="app.closeModal('configuracoes')">×</button>
+            </div>
+            <form onsubmit="app.submitForm(event, 'configuracoes')">
+                <label>Meus Cartões de Crédito</label>
+                <div id="config-cards-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" name="cartoes" placeholder="Ex: Nubank, Inter..." style="margin-bottom: 0;">
+                        <button type="button" onclick="app.addCardField()" style="background: var(--neon-blue); border: none; color: #000; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">+</button>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="has_va_vr" id="has-va-vr" style="width: auto; margin-bottom: 0;">
+                        <label for="has-va-vr" style="margin: 0; cursor: pointer;">Possuo VA/VR</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="neon-btn btn-save btn-blue-solid">Salvar Configurações</button>
             </form>
         </div>
     </div>

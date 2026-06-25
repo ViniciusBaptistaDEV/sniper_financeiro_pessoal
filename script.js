@@ -96,11 +96,62 @@ const app = {
             const v = document.getElementById('pagar-valor'); if (v) v.value = '';
         }
 
+        if (tipo === 'gasto') {
+            this.atualizarFormasPagamento();
+        }
+
         modal.classList.remove('hidden');
     },
 
     closeModal(tipo) {
         document.getElementById('modal-' + tipo)?.classList.add('hidden');
+    },
+
+    addCardField() {
+        const container = document.getElementById('config-cards-container');
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.gap = '5px';
+        div.innerHTML = `
+            <input type="text" name="cartoes" placeholder="Ex: Nubank, Inter..." style="margin-bottom: 0;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: #ff4d4d; border: none; color: #fff; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">-</button>
+        `;
+        container.appendChild(div);
+    },
+
+    async atualizarFormasPagamento() {
+        const select = document.getElementById('gasto-forma-pagamento');
+        if (!select) return;
+
+        try {
+            // Assume que as configurações são salvas em uma aba 'Configuracoes'
+            // Como não temos o endpoint GET, vamos simular a busca ou usar localStorage se preferir
+            // Para este exemplo, vamos buscar via API (você precisará criar o endpoint GET /api/configuracoes)
+            const config = await this.api('/api/configuracoes').catch(() => ({}));
+            
+            let options = `
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Débito">Débito</option>
+                <option value="Boleto">Boleto</option>
+            `;
+
+            if (config.cartoes && Array.isArray(config.cartoes)) {
+                config.cartoes.forEach(cartao => {
+                    options += `<option value="Crédito: ${cartao}">${cartao} (Crédito)</option>`;
+                });
+            } else {
+                options += `<option value="Crédito">Crédito</option>`;
+            }
+
+            if (config.has_va_vr) {
+                options += `<option value="VA/VR">VA/VR</option>`;
+            }
+
+            select.innerHTML = options;
+        } catch (err) {
+            console.error('Erro ao atualizar formas de pagamento:', err);
+        }
     },
 
     toggleParcelas() {
@@ -161,7 +212,14 @@ const app = {
     async submitForm(e, endpoint) {
         e.preventDefault();
         const form = e.target;
-        const data = Object.fromEntries(new FormData(form).entries());
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Tratamento especial para campos múltiplos (como cartões de crédito)
+        if (endpoint === 'configuracoes') {
+            data.cartoes = formData.getAll('cartoes').filter(v => v.trim() !== '');
+            data.has_va_vr = formData.get('has_va_vr') === 'on';
+        }
 
         ['valor', 'valor_estimado', 'total_parcelas', 'dia_vencimento', 'dia_cobranca']
             .forEach(k => { if (data[k]) data[k] = Number(data[k]); });
@@ -177,7 +235,8 @@ const app = {
             'receita': 'receita',
             'nova-conta-fixa': 'conta_fixa',
             'conta-fixa': 'pagar_conta_fixa',
-            'informativo': 'informativo'
+            'informativo': 'informativo',
+            'configuracoes': 'configuracoes'
         };
 
         try {
@@ -247,7 +306,7 @@ const app = {
             const status = pago
                 ? '<span class="badge badge-green">Paga</span>'
                 : (venc < hoje ? '<span class="badge badge-yellow">Atrasada</span>'
-                              : '<span class="badge badge-gray">Pendente</span>');
+                                : '<span class="badge badge-gray">Pendente</span>');
             return `
                 <div class="item-card">
                     <div class="item-title">
