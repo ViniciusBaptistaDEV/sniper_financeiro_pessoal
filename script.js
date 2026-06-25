@@ -60,12 +60,24 @@ const app = {
         return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     },
 
+    toUpperCaseDate(str) {
+        return str ? str.toUpperCase() : '';
+    },
+
     toast(msg, type = 'success') {
         const el = document.getElementById('toast');
         el.textContent = msg;
         el.className = 'toast toast-' + type;
         clearTimeout(this._toastT);
         this._toastT = setTimeout(() => el.classList.add('hidden'), 3000);
+    },
+
+    showLoading() {
+        document.getElementById('modal-loading')?.classList.remove('hidden');
+    },
+
+    hideLoading() {
+        document.getElementById('modal-loading')?.classList.add('hidden');
     },
 
     async api(path, options = {}) {
@@ -82,7 +94,7 @@ const app = {
         return data;
     },
     /* ========== MODAIS ========== */
-    openModal(tipo) {
+    async openModal(tipo) {
         const modal = document.getElementById('modal-' + tipo);
         if (!modal) return;
 
@@ -97,7 +109,11 @@ const app = {
         }
 
         if (tipo === 'gasto') {
-            this.atualizarFormasPagamento();
+            await this.atualizarFormasPagamento();
+        }
+
+        if (tipo === 'configuracoes') {
+            await this.carregarConfiguracoesNoModal();
         }
 
         modal.classList.remove('hidden');
@@ -105,6 +121,41 @@ const app = {
 
     closeModal(tipo) {
         document.getElementById('modal-' + tipo)?.classList.add('hidden');
+    },
+
+    async carregarConfiguracoesNoModal() {
+        try {
+            const config = await this.api('/api/configuracoes-get');
+
+            const container = document.getElementById('config-cards-container');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" name="cartoes" placeholder="Ex: Nubank, Inter..." style="margin-bottom: 0;">
+                    <button type="button" onclick="app.addCardField()" style="background: var(--neon-blue); border: none; color: #000; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">+</button>
+                </div>`;
+
+            if (config.cartoes && Array.isArray(config.cartoes)) {
+                config.cartoes.forEach(cartao => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.gap = '5px';
+                    div.innerHTML = `
+                        <input type="text" name="cartoes" value="${cartao}" placeholder="Ex: Nubank, Inter..." style="margin-bottom: 0;">
+                        <button type="button" onclick="this.parentElement.remove()" style="background: #ff4d4d; border: none; color: #fff; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">-</button>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            const vaVrCheckbox = document.getElementById('has-va-vr');
+            if (vaVrCheckbox) {
+                vaVrCheckbox.checked = !!config.has_va_vr;
+            }
+        } catch (err) {
+            console.error('Erro ao carregar configurações:', err);
+        }
     },
 
     addCardField() {
@@ -124,11 +175,9 @@ const app = {
         if (!select) return;
 
         try {
-            // Assume que as configurações são salvas em uma aba 'Configuracoes'
-            // Como não temos o endpoint GET, vamos simular a busca ou usar localStorage se preferir
-            // Para este exemplo, vamos buscar via API (você precisará criar o endpoint GET /api/configuracoes)
-            const config = await this.api('/api/configuracoes').catch(() => ({}));
-            
+            // Busca as configurações via API no endpoint de leitura
+            const config = await this.api('/api/configuracoes-get').catch(() => ({}));
+
             let options = `
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
@@ -151,6 +200,8 @@ const app = {
             select.innerHTML = options;
         } catch (err) {
             console.error('Erro ao atualizar formas de pagamento:', err);
+        } finally {
+            this.hideLoading();
         }
     },
 
@@ -165,6 +216,7 @@ const app = {
         const select = document.getElementById('pagar-conta-fixa-id');
         select.innerHTML = '<option value="">Carregando...</option>';
 
+        this.showLoading();
         try {
             const { contasFixas } = await this.api('/api/contas-fixas');
             this.state.contasFixas = contasFixas;
@@ -205,6 +257,8 @@ const app = {
         } catch (err) {
             select.innerHTML = '<option value="">Erro ao carregar contas fixas</option>';
             this.toast('Erro ao carregar contas fixas', 'error');
+        } finally {
+            this.hideLoading();
         }
     },
 
@@ -240,7 +294,8 @@ const app = {
         };
 
         try {
-            await this.api('/api/' + endpoint, { method: 'POST', body: JSON.stringify(data) });
+            const apiPath = endpoint === 'configuracoes' ? '/api/configuracoes' : '/api/' + endpoint;
+            await this.api(apiPath, { method: 'POST', body: JSON.stringify(data) });
             this.toast('Salvo com sucesso!', 'success');
             form.reset();
             this.closeModal(closeMap[endpoint]);
@@ -255,6 +310,7 @@ const app = {
         const month = document.getElementById('month-filter')?.value || this.state.currentMonth;
         this.state.currentMonth = month;
 
+        this.showLoading();
         try {
             const [resContas, resInformativos, resLancamentos] = await Promise.all([
                 this.api('/api/contas-fixas'),
@@ -264,7 +320,7 @@ const app = {
 
             const contasFixas = Array.isArray(resContas?.contasFixas) ? resContas.contasFixas : [];
             const informativos = Array.isArray(resInformativos?.informativos) ? resInformativos.informativos : [];
-            const lancamentos  = Array.isArray(resLancamentos?.lancamentos)  ? resLancamentos.lancamentos  : [];
+            const lancamentos = Array.isArray(resLancamentos?.lancamentos) ? resLancamentos.lancamentos : [];
 
             this.state.contasFixas = contasFixas;
             this.state.lancamentosCache = lancamentos;
@@ -281,15 +337,17 @@ const app = {
             });
 
             document.getElementById('sum-receitas').textContent = this.brl(totalReceitas);
-            document.getElementById('sum-gastos').textContent   = this.brl(totalGastos);
-            document.getElementById('sum-contas').textContent   = this.brl(totalContasPagas);
-            document.getElementById('sum-saldo').textContent    = this.brl(totalReceitas - totalGastos - totalContasPagas);
+            document.getElementById('sum-gastos').textContent = this.brl(totalGastos);
+            document.getElementById('sum-contas').textContent = this.brl(totalContasPagas);
+            document.getElementById('sum-saldo').textContent = this.brl(totalReceitas - totalGastos - totalContasPagas);
 
             this.renderContasFixas(contasFixas, lancamentos.filter(l => l.tipo === 'conta_fixa'), contaById);
             this.renderInformativos(Array.isArray(informativos) ? informativos : []);
             this.renderLancamentos(lancamentos, contaById);
         } catch (err) {
             this.toast('Erro ao carregar dashboard: ' + err.message, 'error');
+        } finally {
+            this.hideLoading();
         }
     },
 
@@ -306,7 +364,7 @@ const app = {
             const status = pago
                 ? '<span class="badge badge-green">Paga</span>'
                 : (venc < hoje ? '<span class="badge badge-yellow">Atrasada</span>'
-                                : '<span class="badge badge-gray">Pendente</span>');
+                    : '<span class="badge badge-gray">Pendente</span>');
             return `
                 <div class="item-card">
                     <div class="item-title">
@@ -318,7 +376,7 @@ const app = {
                         <span>${c.tipo || 'infinita'}${c.total_parcelas ? ` • ${c.total_parcelas}x` : ''}</span>
                     </div>
                     <div class="item-value txt-orange">${this.brl(c.valor_estimado)}</div>
-                    ${pago ? `<div class="item-meta"><span>Pago em ${pago.data_realizado} • ${this.brl(pago.valor)}</span></div>` : ''}
+                    ${pago ? `<div class="item-meta"><span>Pago em ${this.toUpperCaseDate(pago.data_realizado)} • ${this.brl(pago.valor)}</span></div>` : ''}
                 </div>`;
         }).join('');
     },
@@ -368,7 +426,7 @@ const app = {
                         ${badge}
                     </div>
                     <div class="item-meta">
-                        <span>${l.data_realizado}</span>
+                        <span>${this.toUpperCaseDate(l.data_realizado)}</span>
                         ${l.forma_pagamento ? `<span>${l.forma_pagamento}</span>` : ''}
                     </div>
                     <div class="item-value ${l.tipo === 'receita' ? 'txt-green' : l.tipo === 'conta_fixa' ? 'txt-orange' : 'txt-purple'}">
@@ -444,7 +502,7 @@ const app = {
         if (item.tipo === 'conta_fixa' && item.conta_fixa_id) {
             const conta = this.state.contasFixas.find(c => String(c.id) === String(item.conta_fixa_id));
             if (conta) desc = conta.descricao;
-            document.getElementById('edit-descricao').readOnly = true; 
+            document.getElementById('edit-descricao').readOnly = true;
         } else {
             document.getElementById('edit-descricao').readOnly = false;
         }
