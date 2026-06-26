@@ -4,7 +4,8 @@
     padding: 0;
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
     width: 100%;
 }
@@ -114,7 +115,8 @@ input[type="date"] {
 input[type="month"]::-webkit-calendar-picker-indicator,
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    filter: invert(1) brightness(2); /* Makes the icon white/bright */
+    filter: invert(1) brightness(2);
+    /* Makes the icon white/bright */
     opacity: 0.8;
     transition: opacity 0.2s;
 }
@@ -589,8 +591,9 @@ main {
     background: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 3rem 1rem;
+    align-items: flex-start;
+    /* Altera de center para flex-start para permitir scroll natural do topo */
+    padding: 2rem 1rem;
     z-index: 10000;
     overflow-y: auto;
     backdrop-filter: blur(4px);
@@ -605,7 +608,14 @@ main {
     border: 1px solid #2a2a2e;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
     animation: slideDown 0.25s ease-out;
+    margin-bottom: 2rem;
+    /* Garante espaço no final do scroll */
 }
+
+#modal-loading {
+    align-items: center;
+}
+
 
 @keyframes slideDown {
     from {
@@ -949,7 +959,7 @@ main {
         flex-direction: column;
         padding: 10px;
         gap: 5px;
-        box-shadow: 0 -10px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.5);
         z-index: 100;
     }
 
@@ -970,11 +980,30 @@ main {
         font-weight: 500;
     }
 
-    .action-btn.btn-purple:active, .action-btn.btn-purple:hover { color: var(--neon-purple); }
-    .action-btn.btn-green:active, .action-btn.btn-green:hover  { color: var(--neon-green); }
-    .action-btn.btn-orange:active, .action-btn.btn-orange:hover { color: var(--neon-orange); }
-    .action-btn.btn-yellow:active, .action-btn.btn-yellow:hover { color: var(--neon-yellow); }
-    .action-btn.btn-blue:active, .action-btn.btn-blue:hover   { color: var(--neon-blue); }
+    .action-btn.btn-purple:active,
+    .action-btn.btn-purple:hover {
+        color: var(--neon-purple);
+    }
+
+    .action-btn.btn-green:active,
+    .action-btn.btn-green:hover {
+        color: var(--neon-green);
+    }
+
+    .action-btn.btn-orange:active,
+    .action-btn.btn-orange:hover {
+        color: var(--neon-orange);
+    }
+
+    .action-btn.btn-yellow:active,
+    .action-btn.btn-yellow:hover {
+        color: var(--neon-yellow);
+    }
+
+    .action-btn.btn-blue:active,
+    .action-btn.btn-blue:hover {
+        color: var(--neon-blue);
+    }
 
     .action-btn:active {
         transform: scale(0.9) !important;
@@ -1089,13 +1118,27 @@ main {
 }
 
 @keyframes loadingMove {
-    0% { left: -40%; }
-    100% { left: 100%; }
+    0% {
+        left: -40%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 
 @keyframes pulseText {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(0.98); }
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
 }
 
 /* Acesso Negado Modal & Futuristic Styles */
@@ -1221,7 +1264,7 @@ main {
     height: 30px;
     border-radius: 8px;
     border: 1px solid #333;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.85rem;

@@ -49,7 +49,8 @@
                     <span class="action-icon">ℹ️</span>
                     <span class="action-label">Informativo</span>
                 </button>
-                <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
+                <button class="action-btn btn-green"
+                    onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
                     <span class="action-icon">📈</span>
                     <span class="action-label">Sniper Investimentos</span>
                 </button>
@@ -75,7 +76,7 @@
                         <span class="action-label">Pagar Conta</span>
                     </button>
                 </div>
-                
+
                 <div class="mobile-menu-wrapper">
                     <button class="action-btn btn-grey menu-toggle" onclick="app.toggleMobileMenu()">
                         <span class="action-icon">☰</span>
@@ -90,7 +91,8 @@
                             <span class="action-icon">ℹ️</span>
                             <span class="action-label">Informativo</span>
                         </button>
-                        <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
+                        <button class="action-btn btn-green"
+                            onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
                             <span class="action-icon">📈</span>
                             <span class="action-label">Sniper Investimentos</span>
                         </button>
@@ -174,7 +176,20 @@
             </div>
             <form onsubmit="app.submitForm(event, 'gasto-diario')">
                 <label>Descrição *</label>
-                <input type="text" name="descricao" required placeholder="Ex: Almoço, Uber, Mercado...">
+                <select name="descricao_select" id="gasto-descricao-select"
+                    onchange="app.toggleDescricaoManual(this.value)">
+                    <option value="">Selecione uma opção...</option>
+                    <option value="Mercado">Mercado</option>
+                    <option value="Combustível">Combustível</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                <div id="gasto-descricao-manual" class="hidden">
+                    <input type="text" name="descricao_manual" placeholder="Digite a descrição...">
+                </div>
                 <label>Valor (R$) *</label>
                 <input type="number" name="valor" step="0.01" min="0" required placeholder="0,00">
                 <div class="row-2">
@@ -189,12 +204,22 @@
                 </div>
                 <label>Forma de Pagamento</label>
                 <select name="forma_pagamento" id="gasto-forma-pagamento">
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Pix">Pix</option>
-                    <option value="Débito">Débito</option>
-                    <option value="Crédito">Crédito</option>
-                    <option value="Boleto">Boleto</option>
+                    <!-- Options populated by script.js -->
                 </select>
+
+                <div id="gasto-credit-details" class="hidden">
+                    <label>Tipo de Pagamento</label>
+                    <select name="tipo_pagamento" id="gasto-tipo-pagamento">
+                        <option value="à vista">À vista</option>
+                        <option value="parcelado">Parcelado</option>
+                    </select>
+
+                    <div id="gasto-parcelas-container" class="hidden">
+                        <label>Quantidade de Parcelas *</label>
+                        <input type="text" name="parcelas" id="gasto-parcelas" maxlength="3" placeholder="Ex: 12">
+                    </div>
+                </div>
+
                 <label>Observação</label>
                 <textarea name="observacao" rows="2" placeholder="Opcional"></textarea>
                 <button type="submit" class="neon-btn btn-save btn-purple-solid">Salvar Gasto</button>
@@ -425,14 +450,17 @@
             </div>
             <form onsubmit="app.submitForm(event, 'configuracoes')">
                 <label>Meus Cartões de Crédito</label>
-                <div id="config-cards-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <div id="config-cards-container"
+                    style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
                     <div style="display: flex; gap: 5px;">
                         <input type="text" name="cartoes" placeholder="Ex: Nubank, Inter..." style="margin-bottom: 0;">
-                        <button type="button" onclick="app.addCardField()" style="background: var(--neon-blue); border: none; color: #000; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">+</button>
+                        <button type="button" onclick="app.addCardField()"
+                            style="background: var(--neon-blue); border: none; color: #000; border-radius: 8px; padding: 0 10px; cursor: pointer; font-weight: bold;">+</button>
                     </div>
                 </div>
-                
-                <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px;">
+
+                <div
+                    style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                         <input type="checkbox" name="has_va_vr" id="has-va-vr" style="width: auto; margin-bottom: 0;">
                         <label for="has-va-vr" style="margin: 0; cursor: pointer;">Possuo VA/VR</label>

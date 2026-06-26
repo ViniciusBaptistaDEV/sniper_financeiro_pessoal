@@ -122,6 +122,15 @@ const app = {
 
             if (tipo === 'gasto') {
                 await this.atualizarFormasPagamento();
+                document.getElementById('gasto-credit-details')?.classList.add('hidden');
+                document.getElementById('gasto-parcelas-container')?.classList.add('hidden');
+
+                // Reset a descrição para o estado inicial
+                const selectDesc = document.getElementById('gasto-descricao-select');
+                if (selectDesc) {
+                    selectDesc.value = '';
+                    document.getElementById('gasto-descricao-manual')?.classList.add('hidden');
+                }
             }
 
             if (tipo === 'configuracoes') {
@@ -136,6 +145,11 @@ const app = {
 
     closeModal(tipo) {
         document.getElementById('modal-' + tipo)?.classList.add('hidden');
+
+        // Sincroniza os dados do dashboard apenas ao fechar o modal de gasto diário
+        if (tipo === 'gasto') {
+            this.loadDashboard();
+        }
     },
 
     async carregarConfiguracoesNoModal() {
@@ -190,22 +204,16 @@ const app = {
         if (!select) return;
 
         try {
-            // Busca as configurações via API no endpoint de leitura
             const config = await this.api('/api/configuracoes-get').catch(() => ({}));
 
             let options = `
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Pix">Pix</option>
-                <option value="Débito">Débito</option>
-                <option value="Boleto">Boleto</option>
+                <option value="Pix">Pix/Débito/Dinheiro</option>
             `;
 
-            if (config.cartoes && Array.isArray(config.cartoes)) {
+            if (config.cartoes && Array.isArray(config.cartoes) && config.cartoes.length > 0) {
                 config.cartoes.forEach(cartao => {
-                    options += `<option value="Crédito: ${cartao}">${cartao} (Crédito)</option>`;
+                    options += `<option value="Crédito: ${cartao}">Cartão Crédito (${cartao})</option>`;
                 });
-            } else {
-                options += `<option value="Crédito">Crédito</option>`;
             }
 
             if (config.has_va_vr) {
@@ -213,6 +221,35 @@ const app = {
             }
 
             select.innerHTML = options;
+
+            // Event listener for credit card payment details
+            select.onchange = () => {
+                const creditDetails = document.getElementById('gasto-credit-details');
+                const isCredit = select.value.startsWith('Crédito:');
+                creditDetails.classList.toggle('hidden', !isCredit);
+                if (!isCredit) {
+                    // Reset credit fields if not credit
+                    document.getElementById('gasto-tipo-pagamento').value = 'à vista';
+                    document.getElementById('gasto-parcelas-container').classList.add('hidden');
+                }
+            };
+
+            // Initialize credit details listeners
+            const tipoPagamento = document.getElementById('gasto-tipo-pagamento');
+            const parcelasContainer = document.getElementById('gasto-parcelas-container');
+            const parcelasInput = document.getElementById('gasto-parcelas');
+
+            if (tipoPagamento && parcelasContainer) {
+                tipoPagamento.onchange = () => {
+                    parcelasContainer.classList.toggle('hidden', tipoPagamento.value !== 'parcelado');
+                };
+            }
+
+            if (parcelasInput) {
+                parcelasInput.oninput = (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                };
+            }
         } catch (err) {
             console.error('Erro ao atualizar formas de pagamento:', err);
         } finally {
@@ -224,6 +261,17 @@ const app = {
         const tipo = document.getElementById('conta-tipo').value;
         const field = document.getElementById('parcelas-field');
         field.classList.toggle('hidden', tipo !== 'parcelada');
+    },
+
+    toggleDescricaoManual(valor) {
+        const manualField = document.getElementById('gasto-descricao-manual');
+        if (manualField) {
+            manualField.classList.toggle('hidden', valor !== 'Outros');
+            const input = manualField.querySelector('input');
+            if (input) {
+                input.required = (valor === 'Outros');
+            }
+        }
     },
 
     /* ========== CONTAS FIXAS (cruzamento por ID) ========== */
@@ -324,13 +372,50 @@ const app = {
         submitBtn.innerHTML = `<span class="spinner"></span> ${loadingTexts[endpoint] || 'Salvando...'}`;
 
         try {
+            // Ajuste para a descrição do Gasto Diário
+            if (endpoint === 'gasto-diario') {
+                const selectDesc = document.getElementById('gasto-descricao-select');
+                const manualDesc = document.getElementById('gasto-descricao-manual')?.querySelector('input');
+
+                if (selectDesc && manualDesc) {
+                    if (selectDesc.value === 'Outros' && manualDesc.value) {
+                        data.descricao = manualDesc.value;
+                    } else {
+                        data.descricao = selectDesc.value;
+                    }
+                }
+                // Remove as chaves temporárias do select/manual para não enviar ao backend
+                delete data.descricao_select;
+                delete data.descricao_manual;
+            }
+
             const apiPath = endpoint === 'configuracoes' ? '/api/configuracoes' : '/api/' + endpoint;
             await this.api(apiPath, { method: 'POST', body: JSON.stringify(data) });
             this.toast('Salvo com sucesso!', 'success');
             form.reset();
-            this.closeModal(closeMap[endpoint]);
-            await this.loadDashboard();
+
+            if (endpoint === 'gasto-diario') {
+                // Mantém o modal aberto para múltiplos lançamentos, apenas reseta os campos
+                // O dashboard será atualizado apenas quando o modal for fechado manualmente
+                const modal = document.getElementById('modal-gasto');
+                if (modal) {
+                    const today = new Date().toISOString().slice(0, 10);
+                    modal.querySelectorAll('input[type="date"]').forEach(i => { if (!i.value) i.value = today; });
+                    modal.querySelectorAll('input[type="month"]').forEach(i => { if (!i.value) i.value = this.state.currentMonth; });
+                    document.getElementById('gasto-credit-details')?.classList.add('hidden');
+                    document.getElementById('gasto-parcelas-container')?.classList.add('hidden');
+                    const selectDesc = document.getElementById('gasto-descricao-select');
+                    if (selectDesc) {
+                        selectDesc.value = '';
+                        document.getElementById('gasto-descricao-manual')?.classList.add('hidden');
+                    }
+                }
+            } else {
+                this.closeModal(closeMap[endpoint]);
+                await this.loadDashboard();
+            }
         } catch (err) {
+
             this.toast('Erro ao salvar: ' + err.message, 'error');
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnHTML;
@@ -471,6 +556,8 @@ const app = {
                     <div class="item-meta">
                         <span>${this.toUpperCaseDate(l.data_realizado)}</span>
                         ${l.forma_pagamento ? `<span>${l.forma_pagamento}</span>` : ''}
+                        ${l.tipo_pagamento && l.tipo_pagamento !== 'à vista' && l.parcelas ? `<span class="badge badge-gray">${l.parcelas}x</span>` : ''}
+                        ${l.tipo_pagamento && l.tipo_pagamento === 'parcelado' && !l.parcelas ? `<span class="badge badge-gray">Parcelado</span>` : ''}
                     </div>
                     <div class="item-value ${l.tipo === 'receita' ? 'txt-green' : l.tipo === 'conta_fixa' ? 'txt-orange' : 'txt-purple'}">
                         ${l.tipo === 'receita' ? '+' : '-'} ${this.brl(l.valor)}
@@ -585,6 +672,10 @@ const app = {
                 payload.conta_fixa_id = itemOriginal.conta_fixa_id;
             }
         }
+
+        // Adiciona campos de crédito se existirem no item original
+        if (itemOriginal.tipo_pagamento) payload.tipo_pagamento = itemOriginal.tipo_pagamento;
+        if (itemOriginal.parcelas) payload.parcelas = itemOriginal.parcelas;
 
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="spinner"></span> Salvando alterações...`;

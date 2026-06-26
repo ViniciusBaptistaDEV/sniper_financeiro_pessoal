@@ -41,6 +41,8 @@ module.exports = async function handler(req, res) {
         if (body.data_realizado !== undefined)   row.set('data_realizado', body.data_realizado);
         if (body.data_competencia !== undefined) row.set('data_competencia', body.data_competencia);
         if (body.forma_pagamento !== undefined)  row.set('forma_pagamento', body.forma_pagamento);
+        if (body.tipo_pagamento !== undefined)    row.set('tipo_pagamento', body.tipo_pagamento);
+        if (body.parcelas !== undefined)          row.set('parcelas', body.parcelas);
         if (body.observacao !== undefined)       row.set('observacao', body.observacao);
 
         await row.save();

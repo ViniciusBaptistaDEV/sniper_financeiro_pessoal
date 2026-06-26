@@ -28,6 +28,8 @@ module.exports = async function handler(req, res) {
             descricao: body.descricao,
             valor: toNumber(body.valor),
             forma_pagamento: body.forma_pagamento || '',
+            tipo_pagamento: body.tipo_pagamento || '',
+            parcelas: body.parcelas || '',
             observacao: body.observacao || '',
         };
 
