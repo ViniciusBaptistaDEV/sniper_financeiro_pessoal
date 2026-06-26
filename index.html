@@ -27,34 +27,80 @@
                 <span class="sidebar-brand-main">SNIPER FINANCEIRO</span>
                 <span class="sidebar-brand-sub">PESSOAL</span>
             </div>
-            <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
-                <span class="action-icon">🛒</span>
-                <span class="action-label">Gasto Diário</span>
-            </button>
-            <button class="action-btn btn-green" onclick="app.openModal('receita')">
-                <span class="action-icon">💰</span>
-                <span class="action-label">Receita</span>
-            </button>
-            <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
-                <span class="action-icon">📌</span>
-                <span class="action-label">Conta Fixa</span>
-            </button>
-            <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
-                <span class="action-icon">💸</span>
-                <span class="action-label">Pagar Conta</span>
-            </button>
-            <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
-                <span class="action-icon">ℹ️</span>
-                <span class="action-label">Informativo</span>
-            </button>
-            <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
-                <span class="action-icon">📈</span>
-                <span class="action-label">Sniper Investimentos</span>
-            </button>
-            <button class="action-btn btn-grey" onclick="app.openModal('configuracoes')">
-                <span class="action-icon">⚙️</span>
-                <span class="action-label">Configurações</span>
-            </button>
+            <!-- Desktop Group -->
+            <div class="desktop-only-group">
+                <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                    <span class="action-icon">🛒</span>
+                    <span class="action-label">Gasto Diário</span>
+                </button>
+                <button class="action-btn btn-green" onclick="app.openModal('receita')">
+                    <span class="action-icon">💰</span>
+                    <span class="action-label">Receita</span>
+                </button>
+                <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
+                    <span class="action-icon">📌</span>
+                    <span class="action-label">Conta Fixa</span>
+                </button>
+                <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
+                    <span class="action-icon">💸</span>
+                    <span class="action-label">Pagar Conta</span>
+                </button>
+                <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                    <span class="action-icon">ℹ️</span>
+                    <span class="action-label">Informativo</span>
+                </button>
+                <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
+                    <span class="action-icon">📈</span>
+                    <span class="action-label">Sniper Investimentos</span>
+                </button>
+                <button class="action-btn btn-grey" onclick="app.openModal('configuracoes')">
+                    <span class="action-icon">⚙️</span>
+                    <span class="action-label">Configurações</span>
+                </button>
+            </div>
+
+            <!-- Mobile Group -->
+            <div class="mobile-only-group">
+                <div class="quick-actions-main-group">
+                    <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                        <span class="action-icon">🛒</span>
+                        <span class="action-label">Gasto Diário</span>
+                    </button>
+                    <button class="action-btn btn-green" onclick="app.openModal('receita')">
+                        <span class="action-icon">💰</span>
+                        <span class="action-label">Receita</span>
+                    </button>
+                    <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
+                        <span class="action-icon">💸</span>
+                        <span class="action-label">Pagar Conta</span>
+                    </button>
+                </div>
+                
+                <div class="mobile-menu-wrapper">
+                    <button class="action-btn btn-grey menu-toggle" onclick="app.toggleMobileMenu()">
+                        <span class="action-icon">☰</span>
+                        <span class="action-label">Menu</span>
+                    </button>
+                    <div id="mobile-menu-content" class="mobile-menu-content hidden">
+                        <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
+                            <span class="action-icon">📌</span>
+                            <span class="action-label">Conta Fixa</span>
+                        </button>
+                        <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                            <span class="action-icon">ℹ️</span>
+                            <span class="action-label">Informativo</span>
+                        </button>
+                        <button class="action-btn btn-green" onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
+                            <span class="action-icon">📈</span>
+                            <span class="action-label">Sniper Investimentos</span>
+                        </button>
+                        <button class="action-btn btn-grey" onclick="app.openModal('configuracoes')">
+                            <span class="action-icon">⚙️</span>
+                            <span class="action-label">Configurações</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="quick-actions-footer" style="margin-top: auto;">
                 <button class="neon-btn btn-logout btn-logout-desktop" onclick="app.logout()">Encerrar Sessão</button>

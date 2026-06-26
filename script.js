@@ -94,29 +94,44 @@ const app = {
         return data;
     },
     /* ========== MODAIS ========== */
+    toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu-content');
+        if (menu) menu.classList.toggle('hidden');
+    },
+
     async openModal(tipo) {
         const modal = document.getElementById('modal-' + tipo);
         if (!modal) return;
 
-        const today = new Date().toISOString().slice(0, 10);
-        modal.querySelectorAll('input[type="date"]').forEach(i => { if (!i.value) i.value = today; });
-        modal.querySelectorAll('input[type="month"]').forEach(i => { if (!i.value) i.value = this.state.currentMonth; });
+        // Fecha o menu mobile ao abrir qualquer modal
+        const menu = document.getElementById('mobile-menu-content');
+        if (menu) menu.classList.add('hidden');
 
-        if (tipo === 'pagar_conta_fixa') {
-            this.popularSelectContasFixas();
-            document.getElementById('pagar-info')?.classList.add('hidden');
-            const v = document.getElementById('pagar-valor'); if (v) v.value = '';
+        this.showLoading();
+
+        try {
+            const today = new Date().toISOString().slice(0, 10);
+            modal.querySelectorAll('input[type="date"]').forEach(i => { if (!i.value) i.value = today; });
+            modal.querySelectorAll('input[type="month"]').forEach(i => { if (!i.value) i.value = this.state.currentMonth; });
+
+            if (tipo === 'pagar_conta_fixa') {
+                await this.popularSelectContasFixas();
+                document.getElementById('pagar-info')?.classList.add('hidden');
+                const v = document.getElementById('pagar-valor'); if (v) v.value = '';
+            }
+
+            if (tipo === 'gasto') {
+                await this.atualizarFormasPagamento();
+            }
+
+            if (tipo === 'configuracoes') {
+                await this.carregarConfiguracoesNoModal();
+            }
+
+            modal.classList.remove('hidden');
+        } finally {
+            this.hideLoading();
         }
-
-        if (tipo === 'gasto') {
-            await this.atualizarFormasPagamento();
-        }
-
-        if (tipo === 'configuracoes') {
-            await this.carregarConfiguracoesNoModal();
-        }
-
-        modal.classList.remove('hidden');
     },
 
     closeModal(tipo) {
@@ -266,6 +281,9 @@ const app = {
     async submitForm(e, endpoint) {
         e.preventDefault();
         const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnHTML = submitBtn.innerHTML;
+
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
@@ -293,6 +311,18 @@ const app = {
             'configuracoes': 'configuracoes'
         };
 
+        const loadingTexts = {
+            'gasto-diario': 'Salvando gasto...',
+            'receita': 'Salvando receita...',
+            'nova-conta-fixa': 'Salvando conta...',
+            'conta-fixa': 'Confirmando pagamento...',
+            'informativo': 'Salvando informativo...',
+            'configuracoes': 'Salvando configurações...'
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner"></span> ${loadingTexts[endpoint] || 'Salvando...'}`;
+
         try {
             const apiPath = endpoint === 'configuracoes' ? '/api/configuracoes' : '/api/' + endpoint;
             await this.api(apiPath, { method: 'POST', body: JSON.stringify(data) });
@@ -302,6 +332,11 @@ const app = {
             await this.loadDashboard();
         } catch (err) {
             this.toast('Erro ao salvar: ' + err.message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHTML;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHTML;
         }
     },
 
@@ -377,6 +412,10 @@ const app = {
                     </div>
                     <div class="item-value txt-orange">${this.brl(c.valor_estimado)}</div>
                     ${pago ? `<div class="item-meta"><span>Pago em ${this.toUpperCaseDate(pago.data_realizado)} • ${this.brl(pago.valor)}</span></div>` : ''}
+                    <div class="item-actions">
+                        <button class="item-action-btn btn-edit" onclick="app.abrirModalEdicaoContaFixa('${c.id}')" title="Editar">✏️</button>
+                        <button class="item-action-btn btn-delete" onclick="app.abrirModalExclusaoContaFixa('${c.id}')" title="Excluir">🗑</button>
+                    </div>
                 </div>`;
         }).join('');
     },
@@ -398,6 +437,10 @@ const app = {
                     ${i.cartao_destino ? `<span>${i.cartao_destino}</span>` : ''}
                 </div>
                 ${i.observacao ? `<div class="item-meta"><span>${i.observacao}</span></div>` : ''}
+                <div class="item-actions">
+                    <button class="item-action-btn btn-edit" onclick="app.abrirModalEdicaoInformativo('${i.id}')" title="Editar">✏️</button>
+                    <button class="item-action-btn btn-delete" onclick="app.abrirModalExclusaoInformativo('${i.id}')" title="Excluir">🗑</button>
+                </div>
             </div>`).join('');
     },
 
@@ -432,9 +475,9 @@ const app = {
                     <div class="item-value ${l.tipo === 'receita' ? 'txt-green' : l.tipo === 'conta_fixa' ? 'txt-orange' : 'txt-purple'}">
                         ${l.tipo === 'receita' ? '+' : '-'} ${this.brl(l.valor)}
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; border-top: 1px solid #2a2a2e; padding-top: 10px;">
-                        <button style="background: transparent; border: 1px solid #00ffff; color: #00ffff; border-radius: 4px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 0 8px rgba(0,255,255,0.2); transition: all 0.2s ease;" onclick="app.abrirModalEdicao('${l.id}')">✏️ Editar</button>
-                        <button style="background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; border-radius: 4px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 0 8px rgba(255,77,77,0.2); transition: all 0.2s ease;" onclick="app.abrirModalExclusao('${l.id}')">🗑 Excluir</button>
+                    <div class="item-actions">
+                        <button class="item-action-btn btn-edit" onclick="app.abrirModalEdicao('${l.id}')" title="Editar">✏️</button>
+                        <button class="item-action-btn btn-delete" onclick="app.abrirModalExclusao('${l.id}')" title="Excluir">🗑</button>
                     </div>
                 </div>`;
         }).join('');
@@ -519,6 +562,10 @@ const app = {
 
     async submitEditarLancamento(e) {
         e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnHTML = submitBtn.innerHTML;
+
         const id = document.getElementById('edit-lancamento-id').value;
         const itemOriginal = this.state.lancamentosCache.find(l => String(l.id) === String(id));
 
@@ -539,6 +586,9 @@ const app = {
             }
         }
 
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner"></span> Salvando alterações...`;
+
         try {
             await this.api('/api/lancamento-update', {
                 method: 'PUT',
@@ -547,9 +597,12 @@ const app = {
 
             this.toast('Lançamento atualizado com sucesso!', 'success');
             this.closeModal('editar-lancamento');
-            this.loadDashboard();
+            await this.loadDashboard();
         } catch (err) {
             this.toast('Erro ao editar: ' + err.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHTML;
         }
     }
 };
