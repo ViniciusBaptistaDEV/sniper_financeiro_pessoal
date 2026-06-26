@@ -52,6 +52,10 @@ const app = {
 
     logout() {
         sessionStorage.removeItem('sniper_pessoal_token');
+        localStorage.removeItem('ia_futuro_user');
+        localStorage.removeItem('ia_futuro_pass');
+        localStorage.removeItem('ia_futuro_auth');
+        localStorage.removeItem('sniper_token');
         window.location.reload();
     },
 
