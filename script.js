@@ -339,6 +339,22 @@ const app = {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
+        // Handle editing fixed account
+        let isEditingContaFixa = false;
+        if (endpoint === 'nova-conta-fixa' && this.state.editingContaFixaId) {
+            isEditingContaFixa = true;
+            endpoint = 'conta-fixa-update'; // Change endpoint to update
+            data.id = this.state.editingContaFixaId;
+        }
+
+        // Handle editing informativo
+        let isEditingInformativo = false;
+        if (endpoint === 'informativo' && this.state.editingInformativoId) {
+            isEditingInformativo = true;
+            endpoint = 'informativo-update'; // Change endpoint to update
+            data.id = this.state.editingInformativoId;
+        }
+
         // Tratamento especial para campos múltiplos (como cartões de crédito)
         if (endpoint === 'configuracoes') {
             data.cartoes = formData.getAll('cartoes').filter(v => v.trim() !== '');
@@ -360,7 +376,9 @@ const app = {
             'nova-conta-fixa': 'conta_fixa',
             'conta-fixa': 'pagar_conta_fixa',
             'informativo': 'informativo',
-            'configuracoes': 'configuracoes'
+            'configuracoes': 'configuracoes',
+            'conta-fixa-update': 'conta_fixa',     // Close the same modal for update
+            'informativo-update': 'informativo'    // Close the same modal for update
         };
 
         const loadingTexts = {
@@ -369,7 +387,9 @@ const app = {
             'nova-conta-fixa': 'Salvando conta...',
             'conta-fixa': 'Confirmando pagamento...',
             'informativo': 'Salvando informativo...',
-            'configuracoes': 'Salvando configurações...'
+            'configuracoes': 'Salvando configurações...',
+            'conta-fixa-update': 'Atualizando conta...',
+            'informativo-update': 'Atualizando informativo...'
         };
 
         submitBtn.disabled = true;
@@ -393,9 +413,30 @@ const app = {
                 delete data.descricao_manual;
             }
 
-            const apiPath = endpoint === 'configuracoes' ? '/api/configuracoes' : '/api/' + endpoint;
-            await this.api(apiPath, { method: 'POST', body: JSON.stringify(data) });
+            // Determine API path and method
+            let apiPath;
+            let method = 'POST';
+            
+            if (endpoint === 'configuracoes') {
+                apiPath = '/api/configuracoes';
+            } else if (endpoint.endsWith('-update')) {
+                apiPath = `/api/${endpoint}`;
+                method = 'PUT';
+            } else {
+                apiPath = `/api/${endpoint}`;
+            }
+
+            await this.api(apiPath, { method: method, body: JSON.stringify(data) });
             this.toast('Salvo com sucesso!', 'success');
+            
+            // Clear editing state after successful save
+            if (isEditingContaFixa) {
+                delete this.state.editingContaFixaId;
+            }
+            if (isEditingInformativo) {
+                delete this.state.editingInformativoId;
+            }
+            
             form.reset();
 
             if (endpoint === 'gasto-diario') {
@@ -754,6 +795,53 @@ const app = {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnHTML;
         }
+    },
+
+    abrirModalEdicaoContaFixa(id) {
+        const item = this.state.contasFixas.find(c => String(c.id) === String(id));
+        if (!item) return;
+
+        // Populate the nova-conta-fixa modal form
+        const modal = document.getElementById('modal-conta_fixa');
+        modal.querySelector('input[name="descricao"]').value = item.descricao;
+        modal.querySelector('input[name="valor_estimado"]').value = item.valor_estimado;
+        modal.querySelector('select[name="tipo"]').value = item.tipo;
+        
+        // Toggle parcelas field if needed
+        const parcelasField = document.getElementById('parcelas-field');
+        if (item.tipo === 'parcelada') {
+            parcelasField.classList.remove('hidden');
+            modal.querySelector('input[name="total_parcelas"]').value = item.total_parcelas || '';
+        } else {
+            parcelasField.classList.add('hidden');
+            modal.querySelector('input[name="total_parcelas"]').value = '';
+        }
+        
+        modal.querySelector('input[name="dia_vencimento"]').value = item.dia_vencimento;
+        modal.querySelector('textarea[name="observacao"]').value = item.observacao || '';
+
+        // Store the ID for when we submit the form
+        this.state.editingContaFixaId = item.id;
+
+        this.openModal('conta_fixa');
+    },
+
+    abrirModalEdicaoInformativo(id) {
+        const item = this.state.informativos.find(i => String(i.id) === String(id));
+        if (!item) return;
+
+        // Populate the informativo modal form
+        const modal = document.getElementById('modal-informativo');
+        modal.querySelector('input[name="servico"]').value = item.servico;
+        modal.querySelector('input[name="dia_cobranca"]').value = item.dia_cobranca;
+        modal.querySelector('input[name="cartao_destino"]').value = item.cartao_destino || '';
+        modal.querySelector('select[name="modalidade"]').value = item.modalidade || 'Mensal';
+        modal.querySelector('textarea[name="observacao"]').value = item.observacao || '';
+
+        // Store the ID for when we submit the form
+        this.state.editingInformativoId = item.id;
+
+        this.openModal('informativo');
     }
 };
 
