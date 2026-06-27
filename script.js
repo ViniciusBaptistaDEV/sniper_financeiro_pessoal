@@ -447,6 +447,7 @@ const app = {
             const lancamentos = Array.isArray(resLancamentos?.lancamentos) ? resLancamentos.lancamentos : [];
 
             this.state.contasFixas = contasFixas;
+            this.state.informativos = informativos;
             this.state.lancamentosCache = lancamentos;
 
             // ⬇️ Índice por ID para cruzamento O(1)
@@ -579,7 +580,7 @@ const app = {
         const item = this.state.lancamentosCache.find(l => String(l.id) === String(id));
         if (!item) return;
 
-        this.state.lancamentoIdExclusao = id;
+        this.state.itemExclusao = { id, tipo: 'lancamento' };
 
         let desc = item.descricao;
         if (item.tipo === 'conta_fixa' && item.conta_fixa_id) {
@@ -600,22 +601,76 @@ const app = {
         this.openModal('confirmar-exclusao');
     },
 
+    abrirModalExclusaoContaFixa(id) {
+        const item = this.state.contasFixas.find(c => String(c.id) === String(id));
+        if (!item) return;
+
+        this.state.itemExclusao = { id, tipo: 'conta_fixa' };
+
+        const previewEl = document.getElementById('delete-item-preview');
+        if (previewEl) {
+            previewEl.innerHTML = `
+                <div style="background:#1d1d20; padding:12px; border-radius:8px; border:1px solid #ff4d4d33; margin-top:10px; color: #fff;">
+                    <strong>${item.descricao}</strong><br>
+                    <span style="color: #ff4d4d;">Valor Estimado: ${this.brl(item.valor_estimado)}</span><br>
+                    <span style="font-size: 0.85rem; color: #aaa;">Vencimento: Dia ${item.dia_vencimento}</span>
+                </div>`;
+        }
+
+        this.openModal('confirmar-exclusao');
+    },
+
+    abrirModalExclusaoInformativo(id) {
+        const item = this.state.informativos?.find(i => String(i.id) === String(id)) || 
+                     this.state.contasFixas.find(i => String(i.id) === String(id)); // Fallback or check state
+        
+        // If not in state, we should ideally have it from loadDashboard
+        // Let's try to find it in the state. Since renderInformativos doesn't save to stateC, 
+        // I should update loadDashboard to save informativos to state.
+        
+        // Temporary fix to handle finding the item
+        const foundItem = this.state.informativos?.find(i => String(i.id) === String(id));
+
+        if (!foundItem) {
+            this.toast('Informativo não encontrado', 'error');
+            return;
+        }
+
+        this.state.itemExclusao = { id, tipo: 'informativo' };
+
+        const previewEl = document.getElementById('delete-item-preview');
+        if (previewEl) {
+            previewEl.innerHTML = `
+                <div style="background:#1d1d20; padding:12px; border-radius:8px; border:1px solid #ff4d4d33; margin-top:10px; color: #fff;">
+                    <strong>${foundItem.servico}</strong><br>
+                    <span style="color: #ff4d4d;">Cobrança: Dia ${foundItem.dia_cobranca}</span><br>
+                    <span style="font-size: 0.85rem; color: #aaa;">Modalidade: ${foundItem.modalidade}</span>
+                </div>`;
+        }
+
+        this.openModal('confirmar-exclusao');
+    },
+
     async confirmarExclusao() {
-        const id = this.state.lancamentoIdExclusao;
-        if (!id) return;
+        const item = this.state.itemExclusao;
+        if (!item) return;
 
         const btn = document.getElementById('btn-confirmar-exclusao');
         const txtOriginal = btn.innerHTML;
         btn.innerHTML = 'Excluindo...';
         btn.disabled = true;
 
+        let endpoint = '/api/lancamento-delete';
+        if (item.tipo === 'conta_fixa') endpoint = '/api/conta-fixa-delete';
+        if (item.tipo === 'informativo') endpoint = '/api/informativo-delete';
+
         try {
-            await this.api('/api/lancamento-delete', {
+            await this.api(endpoint, {
                 method: 'DELETE',
-                body: JSON.stringify({ id })
+                body: JSON.stringify({ id: item.id })
             });
 
-            this.toast('Lançamento excluído com sucesso!', 'success');
+            this.toast('Item excluído com sucesso!', 'success');
             this.closeModal('confirmar-exclusao');
             this.loadDashboard();
         } catch (err) {
