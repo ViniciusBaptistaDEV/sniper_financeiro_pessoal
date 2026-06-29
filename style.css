@@ -442,6 +442,22 @@ main {
     text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
 }
 
+.card-green-dim {
+    border-left-color: rgba(0, 255, 136, 0.4);
+}
+.card-green-dim .card-value {
+    color: rgba(0, 255, 136, 0.7);
+    text-shadow: none;
+}
+
+.card-purple-dim {
+    border-left-color: rgba(188, 19, 254, 0.4);
+}
+.card-purple-dim .card-value {
+    color: rgba(188, 19, 254, 0.7);
+    text-shadow: none;
+}
+
 /* Dashboard Panels */
 .dashboard-panel {
     background: var(--card-bg);

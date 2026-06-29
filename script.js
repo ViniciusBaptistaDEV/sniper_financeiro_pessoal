@@ -555,6 +555,9 @@ const app = {
             this.renderContasFixas(contasFixas, lancamentos.filter(l => l.tipo === 'conta_fixa'), contaById);
             this.renderInformativos(Array.isArray(informativos) ? informativos : []);
             this.renderLancamentos(lancamentos, contaById);
+
+            // Calcula médias móveis após carregamento principal
+            await this.calculateMovingAverages();
         } catch (err) {
             this.toast('Erro ao carregar dashboard: ' + err.message, 'error');
         } finally {
@@ -659,6 +662,55 @@ const app = {
                     </div>
                 </div>`;
         }).join('');
+    },
+
+    async calculateMovingAverages() {
+        const currentMonth = this.state.currentMonth;
+        const targetMonths = [3, 6];
+        const metrics = {
+            receitas: { '3m': 0, '6m': 0 },
+            gastos: { '3m': 0, '6m': 0 }
+        };
+
+        for (const m of targetMonths) {
+            let sumReceitas = 0;
+            let sumGastos = 0;
+            let monthsCounted = 0;
+
+            for (let i = 0; i < m; i++) {
+                const d = new Date(currentMonth + '-01');
+                d.setMonth(d.getMonth() - i);
+                const monthKey = d.toISOString().slice(0, 7);
+
+                try {
+                    const res = await this.api(`/api/lancamentos?mes=${monthKey}`);
+                    const lancamentos = Array.isArray(res?.lancamentos) ? res.lancamentos : [];
+                    
+                    let monthlyReceita = 0;
+                    let monthlyGasto = 0;
+
+                    lancamentos.forEach(l => {
+                        const v = Number(l.valor) || 0;
+                        if (l.tipo === 'receita') monthlyReceita += v;
+                        else if (l.tipo === 'gasto_diario' || l.tipo === 'conta_fixa') monthlyGasto += v;
+                    });
+
+                    sumReceitas += monthlyReceita;
+                    sumGastos += monthlyGasto;
+                    monthsCounted++;
+                } catch (e) {
+                    console.error(`Erro ao buscar médias para ${monthKey}:`, e);
+                }
+            }
+
+            metrics.receitas[`${m}m`] = sumReceitas / monthsCounted;
+            metrics.gastos[`${m}m`] = sumGastos / monthsCounted;
+        }
+
+        document.getElementById('avg-receita-3m').textContent = this.brl(metrics.receitas['3m']);
+        document.getElementById('avg-receita-6m').textContent = this.brl(metrics.receitas['6m']);
+        document.getElementById('avg-gastos-3m').textContent = this.brl(metrics.gastos['3m']);
+        document.getElementById('avg-gastos-6m').textContent = this.brl(metrics.gastos['6m']);
     },
 
     /* ========== FUNÇÕES DE EDITAR E EXCLUIR ========== */
