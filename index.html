@@ -29,22 +29,46 @@
             </div>
             <!-- Desktop Group -->
             <div class="desktop-only-group">
-                <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                <button class="action-btn nav-btn btn-blue active-nav" id="nav-dashboard" onclick="app.switchView('dashboard')">
+                    <span class="action-icon">🏠</span>
+                    <span class="action-label">Dashboard</span>
+                </button>
+                <button class="action-btn nav-btn btn-purple" id="nav-gastos" onclick="app.switchView('gastos')">
                     <span class="action-icon">🛒</span>
-                    <span class="action-label">Gasto Diário</span>
+                    <span class="action-label">Visualizar Gastos Diários</span>
                 </button>
-                <button class="action-btn btn-green" onclick="app.openModal('receita')">
-                    <span class="action-icon">💰</span>
-                    <span class="action-label">Receita</span>
+                <button class="action-btn nav-btn btn-blue" id="nav-informativos" onclick="app.switchView('informativos')">
+                    <span class="action-icon">ℹ️</span>
+                    <span class="action-label">Visualizar Informativos</span>
                 </button>
-                <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
-                    <span class="action-icon">📌</span>
-                    <span class="action-label">Conta Fixa</span>
-                </button>
-                <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
-                    <span class="action-icon">💸</span>
-                    <span class="action-label">Pagar Conta</span>
-                </button>
+
+                <!-- Dropdown Lançamentos -->
+                <div class="sidebar-dropdown" id="desktop-dropdown-lancamentos">
+                    <button class="action-btn btn-dropdown-toggle btn-purple" onclick="app.toggleDropdown()">
+                        <span class="action-icon">🚀</span>
+                        <span class="action-label">Lançamentos</span>
+                        <span class="dropdown-caret">▼</span>
+                    </button>
+                    <div id="dropdown-lancamentos-content" class="dropdown-content">
+                        <button class="action-btn btn-purple" onclick="app.openModal('gasto')">
+                            <span class="action-icon">🛒</span>
+                            <span class="action-label">Gasto Diário</span>
+                        </button>
+                        <button class="action-btn btn-green" onclick="app.openModal('receita')">
+                            <span class="action-icon">💰</span>
+                            <span class="action-label">Receita</span>
+                        </button>
+                        <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
+                            <span class="action-icon">📌</span>
+                            <span class="action-label">Conta Fixa</span>
+                        </button>
+                        <button class="action-btn btn-yellow" onclick="app.openModal('pagar_conta_fixa')">
+                            <span class="action-icon">💸</span>
+                            <span class="action-label">Pagar Conta</span>
+                        </button>
+                    </div>
+                </div>
+
                 <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
                     <span class="action-icon">ℹ️</span>
                     <span class="action-label">Informativo</span>
@@ -83,6 +107,19 @@
                         <span class="action-label">Menu</span>
                     </button>
                     <div id="mobile-menu-content" class="mobile-menu-content hidden">
+                        <button class="action-btn nav-btn btn-blue active-nav" id="mobile-nav-dashboard" onclick="app.switchView('dashboard')">
+                            <span class="action-icon">🏠</span>
+                            <span class="action-label">Dashboard</span>
+                        </button>
+                        <button class="action-btn nav-btn btn-purple" id="mobile-nav-gastos" onclick="app.switchView('gastos')">
+                            <span class="action-icon">🛒</span>
+                            <span class="action-label">Visualizar Gastos Diários</span>
+                        </button>
+                        <button class="action-btn nav-btn btn-blue" id="mobile-nav-informativos" onclick="app.switchView('informativos')">
+                            <span class="action-icon">ℹ️</span>
+                            <span class="action-label">Visualizar Informativos</span>
+                        </button>
+                        <hr class="menu-divider">
                         <button class="action-btn btn-orange" onclick="app.openModal('conta_fixa')">
                             <span class="action-icon">📌</span>
                             <span class="action-label">Conta Fixa</span>
@@ -99,6 +136,11 @@
                         <button class="action-btn btn-grey" onclick="app.openModal('configuracoes')">
                             <span class="action-icon">⚙️</span>
                             <span class="action-label">Configurações</span>
+                        </button>
+                        <hr class="menu-divider menu-divider-logout">
+                        <button class="action-btn btn-logout-menu" onclick="app.logout()">
+                            <span class="action-icon">🚪</span>
+                            <span class="action-label">Encerrar Sessão</span>
                         </button>
                     </div>
                 </div>
@@ -120,49 +162,53 @@
 
             <main>
 
-                <section class="summary-cards" id="summary-cards">
-                    <div class="card-summary card-green">
-                        <span class="card-label">Receitas</span>
-                        <span class="card-value" id="sum-receitas">R$ 0,00</span>
-                    </div>
-                    <div class="card-summary card-purple">
-                        <span class="card-label">Gastos Diários</span>
-                        <span class="card-value" id="sum-gastos">R$ 0,00</span>
-                    </div>
-                    <div class="card-summary card-orange">
-                        <span class="card-label">Contas Fixas Pagas</span>
-                        <span class="card-value" id="sum-contas">R$ 0,00</span>
-                    </div>
-                    <div class="card-summary card-blue">
-                        <span class="card-label">Saldo do Mês</span>
-                        <span class="card-value" id="sum-saldo">R$ 0,00</span>
-                    </div>
-                </section>
+                <div id="view-dashboard" class="app-view active">
+                    <section class="summary-cards" id="summary-cards">
+                        <div class="card-summary card-green">
+                            <span class="card-label">Receitas</span>
+                            <span class="card-value" id="sum-receitas">R$ 0,00</span>
+                        </div>
+                        <div class="card-summary card-purple">
+                            <span class="card-label">Gastos Diários</span>
+                            <span class="card-value" id="sum-gastos">R$ 0,00</span>
+                        </div>
+                        <div class="card-summary card-orange">
+                            <span class="card-label">Contas Fixas Pagas</span>
+                            <span class="card-value" id="sum-contas">R$ 0,00</span>
+                        </div>
+                        <div class="card-summary card-blue">
+                            <span class="card-label">Saldo do Mês</span>
+                            <span class="card-value" id="sum-saldo">R$ 0,00</span>
+                        </div>
+                    </section>
 
-                <section class="dashboard-panel">
-                    <h3 class="panel-title">📅 Contas Fixas do Mês</h3>
-                    <div id="contas-fixas-list" class="cards-list">
-                        <p class="empty-msg">Carregando contas fixas...</p>
-                    </div>
-                </section>
-
-                <section class="dashboard-panel">
-                    <h3 class="panel-title">ℹ️ Informativos do Mês</h3>
-                    <div id="informativos-list" class="cards-list">
-                        <p class="empty-msg">Carregando informativos...</p>
-                    </div>
-                </section>
-
-                <section class="dashboard-panel">
-                    <h3 class="panel-title">📊 Lançamentos do Mês</h3>
-                    <div id="lancamentos-list" class="cards-list">
-                        <p class="empty-msg">Carregando lançamentos...</p>
-                    </div>
-                </section>
-
-                <div class="btn-logout-mobile-wrapper">
-                    <button class="neon-btn btn-logout" onclick="app.logout()">Encerrar Sessão</button>
+                    <section class="dashboard-panel">
+                        <h3 class="panel-title">📅 Contas Fixas do Mês</h3>
+                        <div id="contas-fixas-list" class="cards-list">
+                            <p class="empty-msg">Carregando contas fixas...</p>
+                        </div>
+                    </section>
                 </div>
+
+                <div id="view-informativos" class="app-view hidden">
+                    <section class="dashboard-panel">
+                        <h3 class="panel-title">ℹ️ Informativos do Mês</h3>
+                        <div id="informativos-list" class="cards-list">
+                            <p class="empty-msg">Carregando informativos...</p>
+                        </div>
+                    </section>
+                </div>
+
+                <div id="view-gastos" class="app-view hidden">
+                    <section class="dashboard-panel">
+                        <h3 class="panel-title">📊 Lançamentos do Mês</h3>
+                        <div id="lancamentos-list" class="cards-list">
+                            <p class="empty-msg">Carregando lançamentos...</p>
+                        </div>
+                    </section>
+                </div>
+
+
             </main>
         </div>
     </div>

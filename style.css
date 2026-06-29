@@ -866,15 +866,6 @@ main {
         display: none !important;
     }
 
-    .btn-logout-mobile-wrapper {
-        display: block;
-        padding: 0 1rem 1rem;
-    }
-
-    .btn-logout-mobile-wrapper .btn-logout {
-        width: 100% !important;
-    }
-
     .filter-month {
         width: 100%;
         justify-content: center;
@@ -1024,6 +1015,44 @@ main {
 
     .app-container {
         padding-bottom: 85px;
+    }
+
+    /* Separador e Estados Ativos no Menu Mobile */
+    .menu-divider {
+        border: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        margin: 5px 0;
+        width: 100%;
+    }
+
+    .mobile-menu-content .nav-btn.active-nav {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 8px;
+    }
+
+    .mobile-menu-content .nav-btn.btn-blue.active-nav {
+        color: var(--neon-blue) !important;
+    }
+
+    .mobile-menu-content .nav-btn.btn-purple.active-nav {
+        color: var(--neon-purple) !important;
+    }
+
+    /* Separador e botão de logout no menu mobile */
+    .menu-divider-logout {
+        background: linear-gradient(90deg, transparent, rgba(255, 60, 60, 0.3), transparent) !important;
+        margin: 8px 0 4px !important;
+    }
+
+    .btn-logout-menu {
+        color: #ff4d4d !important;
+    }
+
+    .btn-logout-menu:hover,
+    .btn-logout-menu:active {
+        color: #ff6b6b !important;
+        text-shadow: 0 0 8px rgba(255, 60, 60, 0.6);
     }
 }
 
@@ -1409,4 +1438,107 @@ main {
     background: var(--neon-blue) !important;
     color: #000 !important;
     box-shadow: 0 0 15px var(--neon-blue) !important;
+}
+
+/* ============ SPA VIEW SWITCHING & SIDEBAR DROPDOWN ============ */
+
+/* Estilos de Seção / Título na Sidebar */
+.sidebar-section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    letter-spacing: 1px;
+    margin: 1.5rem 0.5rem 0.5rem 0.5rem;
+    font-weight: 600;
+}
+
+.desktop-only-group .action-btn {
+    margin: 0.4rem 0; /* Espaçamento vertical mais ajustado para caber a navegação e ações */
+}
+
+/* Estado de Destaque na Navegação */
+.desktop-only-group .nav-btn.active-nav {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.desktop-only-group .nav-btn.btn-blue.active-nav {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+}
+
+.desktop-only-group .nav-btn.btn-purple.active-nav {
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+}
+
+.desktop-only-group .nav-btn.btn-green.active-nav {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+/* Dropdown na Sidebar Desktop */
+.sidebar-dropdown {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-dropdown-toggle {
+    margin-bottom: 0 !important;
+}
+
+.dropdown-caret {
+    margin-left: auto;
+    font-size: 0.65rem;
+    color: var(--text-gray);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-dropdown.open .dropdown-caret {
+    transform: rotate(180deg);
+}
+
+/* Gaveta de Itens do Dropdown */
+.dropdown-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-left: 1rem;
+    border-left: 1px dashed rgba(255, 255, 255, 0.15);
+    margin-left: 0.8rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.4rem;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.dropdown-content.open {
+    max-height: 250px;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Botões Internos do Dropdown */
+.dropdown-content .action-btn {
+    margin: 0.2rem 0;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+/* Container de Views do SPA */
+.app-view {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    opacity: 0;
+    transform: translateY(12px);
+}
+
+.app-view.hidden {
+    display: none !important;
+}
+
+.app-view.active {
+    opacity: 1;
+    transform: translateY(0);
 }

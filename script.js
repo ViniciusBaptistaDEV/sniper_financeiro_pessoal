@@ -97,6 +97,51 @@ const app = {
         if (!res.ok) throw new Error(data.error || `Erro HTTP ${res.status}`);
         return data;
     },
+    /* ========== NAVIGATION & DROPDOWNS ========== */
+    switchView(viewId) {
+        document.querySelectorAll('.app-view').forEach(view => {
+            view.classList.add('hidden');
+            view.classList.remove('active');
+        });
+        const activeView = document.getElementById('view-' + viewId);
+        if (activeView) {
+            activeView.classList.remove('hidden');
+            // Force browser reflow to trigger CSS transitions
+            void activeView.offsetWidth;
+            activeView.classList.add('active');
+        }
+
+        // Update active nav button styles (both desktop and mobile)
+        document.querySelectorAll('.desktop-only-group .nav-btn, .mobile-menu-content .nav-btn').forEach(btn => {
+            btn.classList.remove('active-nav');
+        });
+        
+        const activeBtn = document.getElementById('nav-' + viewId);
+        if (activeBtn) {
+            activeBtn.classList.add('active-nav');
+        }
+        
+        const activeMobileBtn = document.getElementById('mobile-nav-' + viewId);
+        if (activeMobileBtn) {
+            activeMobileBtn.classList.add('active-nav');
+        }
+
+        // Auto-close hamburger menu on mobile after view switch
+        const menu = document.getElementById('mobile-menu-content');
+        if (menu) {
+            menu.classList.add('hidden');
+        }
+    },
+
+    toggleDropdown() {
+        const dropdown = document.getElementById('desktop-dropdown-lancamentos');
+        const content = document.getElementById('dropdown-lancamentos-content');
+        if (dropdown && content) {
+            dropdown.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+    },
+
     /* ========== MODAIS ========== */
     toggleMobileMenu() {
         const menu = document.getElementById('mobile-menu-content');
