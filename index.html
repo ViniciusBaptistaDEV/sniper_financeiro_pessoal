@@ -29,17 +29,10 @@
             </div>
             <!-- Desktop Group -->
             <div class="desktop-only-group">
-                <button class="action-btn nav-btn btn-blue active-nav" id="nav-dashboard" onclick="app.switchView('dashboard')">
+                <button class="action-btn nav-btn btn-blue active-nav" id="nav-dashboard"
+                    onclick="app.switchView('dashboard')">
                     <span class="action-icon">🏠</span>
                     <span class="action-label">Dashboard</span>
-                </button>
-                <button class="action-btn nav-btn btn-purple" id="nav-gastos" onclick="app.switchView('gastos')">
-                    <span class="action-icon">🛒</span>
-                    <span class="action-label">Visualizar Gastos Diários</span>
-                </button>
-                <button class="action-btn nav-btn btn-blue" id="nav-informativos" onclick="app.switchView('informativos')">
-                    <span class="action-icon">ℹ️</span>
-                    <span class="action-label">Visualizar Informativos</span>
                 </button>
 
                 <!-- Dropdown Lançamentos -->
@@ -66,12 +59,21 @@
                             <span class="action-icon">💸</span>
                             <span class="action-label">Pagar Conta</span>
                         </button>
+                        <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                            <span class="action-icon">ℹ️</span>
+                            <span class="action-label">Informativo</span>
+                        </button>
                     </div>
                 </div>
 
-                <button class="action-btn btn-blue" onclick="app.openModal('informativo')">
+                <button class="action-btn nav-btn btn-purple" id="nav-gastos" onclick="app.switchView('gastos')">
+                    <span class="action-icon">🛒</span>
+                    <span class="action-label">Visualizar Gastos Diários</span>
+                </button>
+                <button class="action-btn nav-btn btn-blue" id="nav-informativos"
+                    onclick="app.switchView('informativos')">
                     <span class="action-icon">ℹ️</span>
-                    <span class="action-label">Informativo</span>
+                    <span class="action-label">Visualizar Informativos</span>
                 </button>
                 <button class="action-btn btn-green"
                     onclick="window.open('https://appsniperfinanceiro.vercel.app', '_blank')">
@@ -107,15 +109,18 @@
                         <span class="action-label">Menu</span>
                     </button>
                     <div id="mobile-menu-content" class="mobile-menu-content hidden">
-                        <button class="action-btn nav-btn btn-blue active-nav" id="mobile-nav-dashboard" onclick="app.switchView('dashboard')">
+                        <button class="action-btn nav-btn btn-blue active-nav" id="mobile-nav-dashboard"
+                            onclick="app.switchView('dashboard')">
                             <span class="action-icon">🏠</span>
                             <span class="action-label">Dashboard</span>
                         </button>
-                        <button class="action-btn nav-btn btn-purple" id="mobile-nav-gastos" onclick="app.switchView('gastos')">
+                        <button class="action-btn nav-btn btn-purple" id="mobile-nav-gastos"
+                            onclick="app.switchView('gastos')">
                             <span class="action-icon">🛒</span>
                             <span class="action-label">Visualizar Gastos Diários</span>
                         </button>
-                        <button class="action-btn nav-btn btn-blue" id="mobile-nav-informativos" onclick="app.switchView('informativos')">
+                        <button class="action-btn nav-btn btn-blue" id="mobile-nav-informativos"
+                            onclick="app.switchView('informativos')">
                             <span class="action-icon">ℹ️</span>
                             <span class="action-label">Visualizar Informativos</span>
                         </button>
