@@ -203,7 +203,7 @@ const app = {
 
     async carregarConfiguracoesNoModal() {
         try {
-            const config = await this.api('/api/configuracoes-get');
+            const config = await this.api('/api/configuracoes');
 
             const container = document.getElementById('config-cards-container');
             if (!container) return;
@@ -253,7 +253,7 @@ const app = {
         if (!select) return;
 
         try {
-            const config = await this.api('/api/configuracoes-get').catch(() => ({}));
+            const config = await this.api('/api/configuracoes').catch(() => ({}));
 
             let options = `
                 <option value="Pix">Pix/Débito/Dinheiro</option>
@@ -462,14 +462,23 @@ const app = {
             let apiPath;
             let method = 'POST';
             
-            if (endpoint === 'configuracoes') {
-                apiPath = '/api/configuracoes';
-            } else if (endpoint.endsWith('-update')) {
-                apiPath = `/api/${endpoint}`;
-                method = 'PUT';
-            } else {
-                apiPath = `/api/${endpoint}`;
-            }
+        if (endpoint === 'configuracoes') {
+            apiPath = '/api/configuracoes';
+        } else if (endpoint === 'nova-conta-fixa') {
+            apiPath = '/api/contas-fixas';
+        } else if (endpoint === 'conta-fixa') {
+            apiPath = '/api/contas-fixas';
+        } else if (endpoint === 'informativo') {
+            apiPath = '/api/informativos';
+        } else if (endpoint === 'conta-fixa-update' || endpoint === 'informativo-update') {
+            apiPath = endpoint === 'conta-fixa-update' ? '/api/contas-fixas' : '/api/informativos';
+            method = 'PUT';
+        } else if (endpoint.endsWith('-update')) {
+            apiPath = `/api/${endpoint}`;
+            method = 'PUT';
+        } else {
+            apiPath = `/api/${endpoint}`;
+        }
 
             await this.api(apiPath, { method: method, body: JSON.stringify(data) });
             this.toast('Salvo com sucesso!', 'success');
@@ -798,9 +807,9 @@ const app = {
         btn.innerHTML = 'Excluindo...';
         btn.disabled = true;
 
-        let endpoint = '/api/lancamento-delete';
-        if (item.tipo === 'conta_fixa') endpoint = '/api/conta-fixa-delete';
-        if (item.tipo === 'informativo') endpoint = '/api/informativo-delete';
+        let endpoint = '/api/lancamentos';
+        if (item.tipo === 'conta_fixa') endpoint = '/api/contas-fixas';
+        if (item.tipo === 'informativo') endpoint = '/api/informativos';
 
         try {
             await this.api(endpoint, {
@@ -810,7 +819,7 @@ const app = {
 
             this.toast('Item excluído com sucesso!', 'success');
             this.closeModal('confirmar-exclusao');
-            this.loadDashboard();
+            await this.loadDashboard();
         } catch (err) {
             this.toast('Erro ao excluir: ' + err.message, 'error');
         } finally {
@@ -878,7 +887,7 @@ const app = {
         submitBtn.innerHTML = `<span class="spinner"></span> Salvando alterações...`;
 
         try {
-            await this.api('/api/lancamento-update', {
+            await this.api('/api/lancamentos', {
                 method: 'PUT',
                 body: JSON.stringify(payload)
             });

@@ -1,60 +1,89 @@
 // api/configuracoes.js
-// POST /api/configuracoes
-// Salva as configurações do usuário na aba "Configuracoes".
-// Como as configurações são globais para o usuário, vamos manter apenas uma linha (id=1).
-// Body esperado: { cartoes: [], has_va_vr: boolean }
+// Agrupador de rotas para Configurações
+// GET    /api/configuracoes         -> Retorna as configurações
+// POST   /api/configuracoes         -> Salva as configurações
 
-const { getDoc, handlePreflightOrMethod } = require('./sheets-helper');
+const { getDoc, getSheetRows, handlePreflightOrMethod, setCors } = require('../lib/sheets-helper');
 
 module.exports = async function handler(req, res) {
-    if (handlePreflightOrMethod(req, res, 'POST')) return;
+    setCors(res);
+    const { method } = req;
+
+    if (method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
     try {
-        const body = req.body || {};
-        const doc = await getDoc();
-        let sheet = doc.sheetsByTitle['Configuracoes'];
+        // --- GET: Busca configurações ---
+        if (method === 'GET') {
+            const rows = await getSheetRows('Configuracoes');
+            const configRow = rows.find(r => parseInt(r.id, 10) === 1);
 
-        if (!sheet) {
-            // Cria a aba se não existir, já inserindo os cabeçalhos corretamente (v4)
-            sheet = await doc.addSheet({ title: 'Configuracoes', headerValues: ['id', 'cartoes', 'has_va_vr'] });
-        } else {
-            // Tenta carregar os cabeçalhos PRIMEIRO
+            if (!configRow) {
+                return res.status(200).json({ 
+                    ok: true, 
+                    cartoes: [], 
+                    has_va_vr: false 
+                });
+            }
+
+            let cartoes = [];
             try {
-                await sheet.loadHeaderRow();
+                cartoes = JSON.parse(configRow.cartoes || '[]');
             } catch (e) {
-                // Se der erro ao carregar, significa que a aba existe, mas a linha 1 está vazia.
-                // Então nós criamos os cabeçalhos.
-                await sheet.setHeaderRow(['id', 'cartoes', 'has_va_vr']);
+                cartoes = [];
             }
 
-            // Agora sim é 100% seguro checar se o headerValues está correto
-            const headerValues = sheet.headerValues;
-            if (!headerValues || headerValues.length === 0 || !headerValues.includes('id')) {
-                await sheet.setHeaderRow([ 'id', 'cartoes', 'has_va_vr' ]);
+            return res.status(200).json({
+                ok: true,
+                cartoes: cartoes,
+                has_va_vr: configRow.has_va_vr === 'TRUE'
+            });
+        }
+
+        // --- POST: Salva configurações ---
+        if (method === 'POST') {
+            const body = req.body || {};
+            const doc = await getDoc();
+            let sheet = doc.sheetsByTitle['Configuracoes'];
+
+            if (!sheet) {
+                sheet = await doc.addSheet({ title: 'Configuracoes', headerValues: ['id', 'cartoes', 'has_va_vr'] });
+            } else {
+                try {
+                    await sheet.loadHeaderRow();
+                } catch (e) {
+                    await sheet.setHeaderRow(['id', 'cartoes', 'has_va_vr']);
+                }
+
+                const headerValues = sheet.headerValues;
+                if (!headerValues || headerValues.length === 0 || !headerValues.includes('id')) {
+                    await sheet.setHeaderRow([ 'id', 'cartoes', 'has_va_vr' ]);
+                }
             }
+
+            const rows = await sheet.getRows();
+            const configRow = rows.find(r => parseInt(r.get('id'), 10) === 1);
+
+            const payload = {
+                cartoes: JSON.stringify(body.cartoes || []),
+                has_va_vr: body.has_va_vr ? 'TRUE' : 'FALSE'
+            };
+
+            if (configRow) {
+                Object.keys(payload).forEach(key => configRow.set(key, payload[key]));
+                await configRow.save();
+            } else {
+                await sheet.addRow({ id: 1, ...payload });
+            }
+
+            return res.status(200).json({ ok: true, message: 'Configurações salvas com sucesso.' });
         }
 
-        // Continua pegando as linhas normalmente
-        const rows = await sheet.getRows();
-        const configRow = rows.find(r => parseInt(r.get('id'), 10) === 1);
+        return res.status(405).json({ ok: false, error: 'Método não permitido.' });
 
-        const payload = {
-            cartoes: JSON.stringify(body.cartoes || []),
-            has_va_vr: body.has_va_vr ? 'TRUE' : 'FALSE'
-        };
-
-        if (configRow) {
-            // Atualiza a linha 1
-            Object.keys(payload).forEach(key => configRow.set(key, payload[key]));
-            await configRow.save();
-        } else {
-            // Cria a primeira linha
-            await sheet.addRow({ id: 1, ...payload });
-        }
-
-        return res.status(200).json({ ok: true, message: 'Configurações salvas com sucesso.' });
     } catch (err) {
-        console.error('Erro em /api/configuracoes (POST):', err);
-        return res.status(500).json({ ok: false, error: err.message || 'Erro ao salvar configurações.' });
+        console.error('Erro em /api/configuracoes:', err);
+        return res.status(500).json({ ok: false, error: err.message || 'Erro ao processar configurações.' });
     }
 };
